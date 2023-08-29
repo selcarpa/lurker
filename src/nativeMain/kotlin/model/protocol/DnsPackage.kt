@@ -1,4 +1,4 @@
-package model
+package model.protocol
 
 import io.ktor.utils.io.core.*
 

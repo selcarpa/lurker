@@ -1,0 +1,16 @@
+{
+  timeout: 5000,
+  doh: {
+    enable: false
+  },
+  dns: {
+    udp: {
+      enable: true,
+      listen: 53
+    },
+    tcp: {
+      enable: true,
+      listen: 53
+    },
+  }
+}

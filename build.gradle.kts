@@ -1,9 +1,11 @@
-val ktorVersion: String by project
-val kotlinVersion: String by project
+val ktor_version: String by project
+val kotlin_version: String by project
+val okio_version:String by project
 
 plugins {
     kotlin("multiplatform") version "1.9.0"
     id("io.ktor.plugin") version "2.3.3"
+    kotlin("plugin.serialization") version "1.9.0"
 //    id("app.cash.sqldelight") version "2.0.0"
 }
 
@@ -46,10 +48,12 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.ktor:ktor-server-core:$ktorVersion")
-                implementation("io.ktor:ktor-server-cio:$ktorVersion")
-                implementation("io.ktor:ktor-network-tls:$ktorVersion")
-                implementation("app.cash.sqldelight:native-driver:2.0.0")
+                implementation("io.ktor:ktor-server-core:$ktor_version")
+                implementation("io.ktor:ktor-server-cio:$ktor_version")
+                implementation("io.ktor:ktor-network-tls:$ktor_version")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+                implementation("com.squareup.okio:okio:$okio_version")
+//                implementation("app.cash.sqldelight:native-driver:2.0.0")
             }
         }
 

@@ -7,7 +7,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import lurker.Dns
 import lurker.configureRouting
-fun main() {
+import model.config.Config.ConfigurationUrl
+
+fun main(args: Array<String>) {
+    args.forEach {
+        if (it.startsWith("-c=")) {
+            ConfigurationUrl = it.replace("-c=", "")
+        }
+    }
+
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = false)
 

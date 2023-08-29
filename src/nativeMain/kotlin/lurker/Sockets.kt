@@ -4,7 +4,7 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.runBlocking
-import model.DnsPackage
+import model.protocol.DnsPackage
 
 object Dns {
     fun startServer(selectorManager: SelectorManager, port: Int = 53) {
