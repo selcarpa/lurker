@@ -13,6 +13,9 @@ fun main() {
 
     Dns.startServer(selectorManager = SelectorManager(Dispatchers.IO), port = 18888)
 //    Dns.sendADnsRequest(selectorManager = SelectorManager(Dispatchers.IO))
+
+
+    print("Blessed are those who mourn, for they shall be comforted.")
 }
 
 fun Application.module() {

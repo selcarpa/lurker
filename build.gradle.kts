@@ -1,5 +1,5 @@
-val ktor_version: String by project
-val kotlin_version: String by project
+val ktorVersion: String by project
+val kotlinVersion: String by project
 
 plugins {
     kotlin("multiplatform") version "1.9.0"
@@ -46,9 +46,9 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.ktor:ktor-server-core:$ktor_version")
-                implementation("io.ktor:ktor-server-cio:$ktor_version")
-                implementation("io.ktor:ktor-network-tls:$ktor_version")
+                implementation("io.ktor:ktor-server-core:$ktorVersion")
+                implementation("io.ktor:ktor-server-cio:$ktorVersion")
+                implementation("io.ktor:ktor-network-tls:$ktorVersion")
                 implementation("app.cash.sqldelight:native-driver:2.0.0")
             }
         }
