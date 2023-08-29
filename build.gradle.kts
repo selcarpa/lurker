@@ -1,9 +1,10 @@
 val ktor_version: String by project
 val kotlin_version: String by project
 val okio_version:String by project
+val logback_version: String by project
 
 plugins {
-    kotlin("multiplatform") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
     id("io.ktor.plugin") version "2.3.3"
     kotlin("plugin.serialization") version "1.9.0"
 //    id("app.cash.sqldelight") version "2.0.0"
@@ -17,6 +18,14 @@ repositories {
     google()
 }
 
+application {
+    mainClass.set("one.tain.demo.ApplicationKt")
+
+    val isDevelopment: Boolean = project.ext.has("development")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+
 //sqldelight {
 //    databases {
 //        create("Database") {
@@ -25,37 +34,11 @@ repositories {
 //    }
 //}
 
-kotlin {
-    val hostOs = System.getProperty("os.name")
-    val isArm64 = System.getProperty("os.arch") == "aarch64"
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" && isArm64 -> macosArm64("native")
-        hostOs == "Mac OS X" && !isArm64 -> macosX64("native")
-        hostOs == "Linux" && isArm64 -> linuxArm64("native")
-        hostOs == "Linux" && !isArm64 -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
-
-    nativeTarget.apply {
-        binaries {
-            executable {
-                entryPoint = "main"
-            }
-        }
-    }
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation("io.ktor:ktor-server-core:$ktor_version")
-                implementation("io.ktor:ktor-server-cio:$ktor_version")
-                implementation("io.ktor:ktor-network-tls:$ktor_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-                implementation("com.squareup.okio:okio:$okio_version")
+dependencies {
+    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-cio-jvm:$ktor_version")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("com.squareup.okio:okio:$okio_version")
 //                implementation("app.cash.sqldelight:native-driver:2.0.0")
-            }
-        }
-
-    }
 }
