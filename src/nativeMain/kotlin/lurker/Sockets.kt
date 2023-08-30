@@ -10,6 +10,9 @@ import model.protocol.DnsPackage.Companion.toByteArray
 import utils.encodeHex
 
 object Dns {
+
+    val udpConnects = mutableListOf<UdpConnect>()
+
     fun startServer(selectorManager: SelectorManager, port: Int = 53) {
         runBlocking {
             val serverSocket = aSocket(selectorManager).udp().bind(InetSocketAddress("0.0.0.0", port))
@@ -17,8 +20,25 @@ object Dns {
             while (true) {
                 val datagram = serverSocket.receive()
                 val readBytes = datagram.packet.readBytes()
-                println("Accepted ${String(readBytes)}")
-                serverSocket.send(Datagram(ByteReadPacket("reply".toByteArray()), datagram.address))
+                val dnsPackage = readBytes.toDnsPackage()
+                println("Accepted $dnsPackage")
+                if (true) {
+                    runBlocking {
+                        val socket = aSocket(selectorManager).udp().connect(InetSocketAddress("8.8.8.8", port))
+                        val byteArray = dnsPackage.toByteArray()
+                        socket.send(
+                            Datagram(
+                                ByteReadPacket(byteArray), socket.remoteAddress
+                            )
+                        )
+                        while (true) {
+                            val datagram = socket.receive()
+                            val readBytes = datagram.packet.readBytes()
+                            println("Accepted ${readBytes.encodeHex()}")
+                            println(readBytes.toDnsPackage())
+                        }
+                    }
+                }
             }
         }
     }
@@ -45,4 +65,8 @@ object Dns {
 
 }
 
+class UdpConnect(
+    val socket: ConnectedDatagramSocket
+) {
+}
 
