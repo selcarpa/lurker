@@ -51,81 +51,81 @@ data class DnsPackage(
             this.writeByte(0)
         }
 
-        fun parse(content: ByteArray): DnsPackage {
-            val ID = content[0].toInt() * 256 + content[1].toInt()
-            val QR = content[2].toInt() and 0b10000000 != 0
-            val OPCODE = content[2].toInt() and 0b01111000 shr 3
-            val AA = content[2].toInt() and 0b00000100 != 0
-            val TC = content[2].toInt() and 0b00000010 != 0
-            val RD = content[2].toInt() and 0b00000001 != 0
-            val RA = content[3].toInt() and 0b10000000 != 0
-            val Z = content[3].toInt() and 0b01110000 shr 4
-            val RCODE = content[3].toInt() and 0b00001111
-            val QDCOUNT = content[4].toInt() * 256 + content[5].toInt()
-            val ANCOUNT = content[6].toInt() * 256 + content[7].toInt()
-            val NSCOUNT = content[8].toInt() * 256 + content[9].toInt()
-            val ARCOUNT = content[10].toInt() * 256 + content[11].toInt()
+        fun ByteArray.toDnsPackage(): DnsPackage {
+            val ID = this[0].toInt() * 256 + this[1].toInt()
+            val QR = this[2].toInt() and 0b10000000 != 0
+            val OPCODE = this[2].toInt() and 0b01111000 shr 3
+            val AA = this[2].toInt() and 0b00000100 != 0
+            val TC = this[2].toInt() and 0b00000010 != 0
+            val RD = this[2].toInt() and 0b00000001 != 0
+            val RA = this[3].toInt() and 0b10000000 != 0
+            val Z = this[3].toInt() and 0b01110000 shr 4
+            val RCODE = this[3].toInt() and 0b00001111
+            val QDCOUNT = this[4].toInt() * 256 + this[5].toInt()
+            val ANCOUNT = this[6].toInt() * 256 + this[7].toInt()
+            val NSCOUNT = this[8].toInt() * 256 + this[9].toInt()
+            val ARCOUNT = this[10].toInt() * 256 + this[11].toInt()
             val question = mutableListOf<Question>()
             var index = 12
             for (i in 0 until QDCOUNT) {
-                val qnPair = parseDomainName(content, index)
+                val qnPair = parseDomainName(this, index)
                 val QNAME = qnPair.first
                 index = qnPair.second
-                val QTYPE = content[index].toInt() * 256 + content[index + 1].toInt()
+                val QTYPE = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val QCLASS = content[index].toInt() * 256 + content[index + 1].toInt()
+                val QCLASS = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
                 question.add(Question(QNAME, TYPE.of(QTYPE), QCLASS))
             }
             val answer = mutableListOf<Resource>()
             for (i in 0 until ANCOUNT) {
-                val rPair = parseDomainName(content, index)
+                val rPair = parseDomainName(this, index)
                 val NAME = rPair.first
                 index = rPair.second
-                val tTYPE = content[index].toInt() * 256 + content[index + 1].toInt()
+                val tTYPE = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val CLASS = content[index].toInt() * 256 + content[index + 1].toInt()
+                val CLASS = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
                 val TTL =
-                    content[index].toInt() * 256 * 256 * 256 + content[index + 1].toInt() * 256 * 256 + content[index + 2].toInt() * 256 + content[index + 3].toInt()
+                    this[index].toInt() * 256 * 256 * 256 + this[index + 1].toInt() * 256 * 256 + this[index + 2].toInt() * 256 + this[index + 3].toInt()
                 index += 4
-                val RDLENGTH = content[index].toInt() * 256 + content[index + 1].toInt()
+                val RDLENGTH = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val RDATA = content.copyOfRange(index, index + RDLENGTH).contentToString()
+                val RDATA = this.copyOfRange(index, index + RDLENGTH).contentToString()
                 answer.add(Resource(NAME, TYPE.of(tTYPE), CLASS, TTL, RDLENGTH, RDATA))
             }
             val authority = mutableListOf<Resource>()
             for (i in 0 until NSCOUNT) {
-                val rPair = parseDomainName(content, index)
+                val rPair = parseDomainName(this, index)
                 val NAME = rPair.first
                 index = rPair.second
-                val tTYPE = content[index].toInt() * 256 + content[index + 1].toInt()
+                val tTYPE = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val CLASS = content[index].toInt() * 256 + content[index + 1].toInt()
+                val CLASS = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
                 val TTL =
-                    content[index].toInt() * 256 * 256 * 256 + content[index + 1].toInt() * 256 * 256 + content[index + 2].toInt() * 256 + content[index + 3].toInt()
+                    this[index].toInt() * 256 * 256 * 256 + this[index + 1].toInt() * 256 * 256 + this[index + 2].toInt() * 256 + this[index + 3].toInt()
                 index += 4
-                val RDLENGTH = content[index].toInt() * 256 + content[index + 1].toInt()
+                val RDLENGTH = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val RDATA = content.copyOfRange(index, index + RDLENGTH).contentToString()
+                val RDATA = this.copyOfRange(index, index + RDLENGTH).contentToString()
                 authority.add(Resource(NAME, TYPE.of(tTYPE), CLASS, TTL, RDLENGTH, RDATA))
             }
             val additional = mutableListOf<Resource>()
             for (i in 0 until ARCOUNT) {
-                val rPair = parseDomainName(content, index)
+                val rPair = parseDomainName(this, index)
                 val NAME = rPair.first
                 index = rPair.second
-                val tTYPE = content[index].toInt() * 256 + content[index + 1].toInt()
+                val tTYPE = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val CLASS = content[index].toInt() * 256 + content[index + 1].toInt()
+                val CLASS = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
                 val TTL =
-                    content[index].toInt() * 256 * 256 * 256 + content[index + 1].toInt() * 256 * 256 + content[index + 2].toInt() * 256 + content[index + 3].toInt()
+                    this[index].toInt() * 256 * 256 * 256 + this[index + 1].toInt() * 256 * 256 + this[index + 2].toInt() * 256 + this[index + 3].toInt()
                 index += 4
-                val RDLENGTH = content[index].toInt() * 256 + content[index + 1].toInt()
+                val RDLENGTH = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                val RDATA = content.copyOfRange(index, index + RDLENGTH).contentToString()
+                val RDATA = this.copyOfRange(index, index + RDLENGTH).contentToString()
                 authority.add(Resource(NAME, TYPE.of(tTYPE), CLASS, TTL, RDLENGTH, RDATA))
             }
             return DnsPackage(
@@ -150,44 +150,44 @@ data class DnsPackage(
         }
 
 
-        fun toByteArray(dnsPackage: DnsPackage): ByteArray {
+        fun DnsPackage.toByteArray(): ByteArray {
             val bytePacketBuilder = BytePacketBuilder()
-            bytePacketBuilder.writeShort(dnsPackage.ID.toShort())
+            bytePacketBuilder.writeShort(this.ID.toShort())
             var flags = 0
-            if (dnsPackage.QR) flags += 0b1000000000000000
-            flags += dnsPackage.OPCODE shl 11
-            if (dnsPackage.AA) flags += 0b0000010000000000
-            if (dnsPackage.TC) flags += 0b0000001000000000
-            if (dnsPackage.RD) flags += 0b0000000100000000
-            if (dnsPackage.RA) flags += 0b0000000010000000
-            flags += dnsPackage.Z shl 4
-            flags += dnsPackage.RCODE
+            if (this.QR) flags += 0b1000000000000000
+            flags += this.OPCODE shl 11
+            if (this.AA) flags += 0b0000010000000000
+            if (this.TC) flags += 0b0000001000000000
+            if (this.RD) flags += 0b0000000100000000
+            if (this.RA) flags += 0b0000000010000000
+            flags += this.Z shl 4
+            flags += this.RCODE
             bytePacketBuilder.writeShort(flags.toShort())
-            bytePacketBuilder.writeShort(dnsPackage.QDCOUNT.toShort())
-            bytePacketBuilder.writeShort(dnsPackage.ANCOUNT.toShort())
-            bytePacketBuilder.writeShort(dnsPackage.NSCOUNT.toShort())
-            bytePacketBuilder.writeShort(dnsPackage.ARCOUNT.toShort())
-            for (question in dnsPackage.question) {
+            bytePacketBuilder.writeShort(this.QDCOUNT.toShort())
+            bytePacketBuilder.writeShort(this.ANCOUNT.toShort())
+            bytePacketBuilder.writeShort(this.NSCOUNT.toShort())
+            bytePacketBuilder.writeShort(this.ARCOUNT.toShort())
+            for (question in this.question) {
                 bytePacketBuilder.writeDomain(question.QNAME)
                 bytePacketBuilder.writeByte(0)
                 bytePacketBuilder.writeShort(question.QTYPE.value.toShort())
                 bytePacketBuilder.writeShort(question.QCLASS.toShort())
             }
-            for (resource in dnsPackage.answer) {
+            for (resource in this.answer) {
                 bytePacketBuilder.writeShort(resource.TYPE.value.toShort())
                 bytePacketBuilder.writeShort(resource.CLASS.toShort())
                 bytePacketBuilder.writeInt(resource.TTL)
                 bytePacketBuilder.writeShort(resource.RDLENGTH.toShort())
                 bytePacketBuilder.writeRDATA(resource.RDATA, resource.TYPE)
             }
-            for (resource in dnsPackage.authority) {
+            for (resource in this.authority) {
                 bytePacketBuilder.writeShort(resource.TYPE.value.toShort())
                 bytePacketBuilder.writeShort(resource.CLASS.toShort())
                 bytePacketBuilder.writeInt(resource.TTL)
                 bytePacketBuilder.writeShort(resource.RDLENGTH.toShort())
                 bytePacketBuilder.writeRDATA(resource.RDATA, resource.TYPE)
             }
-            for (resource in dnsPackage.additional) {
+            for (resource in this.additional) {
                 bytePacketBuilder.writeShort(resource.TYPE.value.toShort())
                 bytePacketBuilder.writeShort(resource.CLASS.toShort())
                 bytePacketBuilder.writeInt(resource.TTL)

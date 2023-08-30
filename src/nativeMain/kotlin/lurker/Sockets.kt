@@ -5,12 +5,15 @@ import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.runBlocking
 import model.protocol.DnsPackage
+import model.protocol.DnsPackage.Companion.toDnsPackage
+import model.protocol.DnsPackage.Companion.toByteArray
+import utils.encodeHex
 
 object Dns {
     fun startServer(selectorManager: SelectorManager, port: Int = 53) {
         runBlocking {
             val serverSocket = aSocket(selectorManager).udp().bind(InetSocketAddress("0.0.0.0", port))
-            println("Echo Server listening at ${serverSocket.localAddress}")
+            println("Dns Server listening at ${serverSocket.localAddress}")
             while (true) {
                 val datagram = serverSocket.receive()
                 val readBytes = datagram.packet.readBytes()
@@ -20,11 +23,10 @@ object Dns {
         }
     }
 
-    fun sendADnsRequest(selectorManager: SelectorManager, port: Int = 53) {
+    fun sendADnsRequest(selectorManager: SelectorManager, port: Int = 53, dnsPackage: DnsPackage) {
         runBlocking {
             val socket = aSocket(selectorManager).udp().connect(InetSocketAddress("8.8.8.8", port))
-            val hex = "10210100000100000000000002743406616574686c6902636e00001c0001"
-            val byteArray = hex.decodeHex()
+            val byteArray = dnsPackage.toByteArray()
             socket.send(
                 Datagram(
                     ByteReadPacket(byteArray), socket.remoteAddress
@@ -35,23 +37,12 @@ object Dns {
                 val readBytes = datagram.packet.readBytes()
                 println("Accepted ${readBytes.encodeHex()}")
 
-                val dnsPackage = DnsPackage.parse(readBytes)
+                val dnsPackage = readBytes.toDnsPackage()
                 println(dnsPackage)
             }
         }
     }
 
-    private fun String.decodeHex(): ByteArray {
-        check(length % 2 == 0) { "Must have an even length" }
-
-        return chunked(2)
-            .map { it.toInt(16).toByte() }
-            .toByteArray()
-    }
-
-    private fun ByteArray.encodeHex(): String = joinToString("") {
-        it.toInt().and(0xff).toString(16).padStart(2, '0')
-    }
 }
 
 
