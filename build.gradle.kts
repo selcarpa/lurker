@@ -53,6 +53,7 @@ kotlin {
                 implementation("io.ktor:ktor-network-tls:$ktor_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
                 implementation("com.squareup.okio:okio:$okio_version")
+    implementation("net.peanuuutz:tomlkt:0.2.0")
 //                implementation("app.cash.sqldelight:native-driver:2.0.0")
             }
         }

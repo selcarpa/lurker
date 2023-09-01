@@ -4,14 +4,13 @@ import kotlinx.coroutines.*
 import kotlin.time.Duration
 
 
-fun CoroutineScope.Ticker(
+fun CoroutineScope.Timer(
     duration: Duration,
-    onTick: () -> Unit
-) {
-    this.launch(Dispatchers.Main) {
-        while (true) {
-            withContext(Dispatchers.IO) { onTick() }
-            delay(duration)
-        }
+    dispatcher: CoroutineDispatcher,
+    run: () -> Unit,
+): Job {
+    return this.launch(dispatcher) {
+        delay(duration)
+        withContext(dispatcher) { run() }
     }
 }

@@ -8,6 +8,7 @@ import lurker.Dns
 import lurker.configureRouting
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
+import kotlin.native.concurrent.Worker
 
 fun main(args: Array<String>) {
     args.forEach {
@@ -24,10 +25,6 @@ fun main(args: Array<String>) {
     if (Configuration.dns.udp.enable) {
         Dns.startServer(selectorManager = SelectorManager(Dispatchers.IO), port = Configuration.dns.udp.port)
     }
-
-
-//    Dns.sendADnsRequest(selectorManager = SelectorManager(Dispatchers.IO))
-
 
     print("Blessed are those who mourn, for they shall be comforted.")
 }
