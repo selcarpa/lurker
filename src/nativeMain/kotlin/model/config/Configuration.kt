@@ -3,6 +3,7 @@ package model.config
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import net.peanuuutz.tomlkt.Toml
 import okio.Path.Companion.toPath
 import utils.readFile
 
@@ -12,6 +13,10 @@ private val json = Json {
     isLenient = true
     ignoreUnknownKeys = true
     explicitNulls = false
+}
+
+private val toml = Toml {
+    ignoreUnknownKeys = true
 }
 
 object Config {
@@ -25,9 +30,9 @@ object Config {
             val content = readFile(ConfigurationUrl!!.toPath())
             if (ConfigurationUrl!!.endsWith("json") || ConfigurationUrl!!.endsWith("json5")) {
                 json.decodeFromString<ConfigurationSettings>(content)
-            }/* else if (file.name.endsWith("toml")) {
-                toml.decodeFromString<ConfigurationSettings>(content)
-            }*/ else {
+            } else if (ConfigurationUrl!!.endsWith("toml") || ConfigurationUrl!!.endsWith("json5")) {
+                toml.decodeFromString(ConfigurationSettings.serializer(), content)
+            } else {
                 throw Exception("not support file type")
             }
         }
@@ -35,7 +40,9 @@ object Config {
 }
 
 @Serializable
-data class ConfigurationSettings(val timeout: Int, var doh: DohSettings = DohSettings(), var dns: DnsSettings = DnsSettings())
+data class ConfigurationSettings(
+    val timeout: Int, var doh: DohSettings = DohSettings(), var dns: DnsSettings = DnsSettings()
+)
 
 @Serializable
 data class DnsSettings(var udp: DnsUdpSettings = DnsUdpSettings(), var tcp: DnsTcpSettings = DnsTcpSettings())
