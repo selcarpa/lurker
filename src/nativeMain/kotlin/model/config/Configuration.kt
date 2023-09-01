@@ -25,12 +25,12 @@ object Config {
 
     private fun initConfiguration(): ConfigurationSettings {
         return if (ConfigurationUrl.orEmpty().isEmpty()) {
-            TODO("Not yet implemented")
+            TODO("Kotlin native not support read resource file, please use -c=xxx to specify configuration file")
         } else {
             val content = readFile(ConfigurationUrl!!.toPath())
             if (ConfigurationUrl!!.endsWith("json") || ConfigurationUrl!!.endsWith("json5")) {
                 json.decodeFromString<ConfigurationSettings>(content)
-            } else if (ConfigurationUrl!!.endsWith("toml") || ConfigurationUrl!!.endsWith("json5")) {
+            } else if (ConfigurationUrl!!.endsWith("toml")) {
                 toml.decodeFromString(ConfigurationSettings.serializer(), content)
             } else {
                 throw Exception("not support file type")

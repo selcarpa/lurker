@@ -3,12 +3,10 @@ import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import lurker.Dns
 import lurker.configureRouting
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
-import kotlin.native.concurrent.Worker
 
 fun main(args: Array<String>) {
     args.forEach {
