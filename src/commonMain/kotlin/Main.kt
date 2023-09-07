@@ -1,8 +1,7 @@
 import io.ktor.network.selector.*
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import lurker.Dns
 import lurker.configureRouting
 import model.config.Config.Configuration
@@ -16,8 +15,7 @@ fun main(args: Array<String>) {
     }
 
     if (Configuration.doh.enable) {
-        embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
-            .start(wait = false)
+        dohStart()
     }
 
     if (Configuration.dns.udp.enable) {
@@ -26,6 +24,8 @@ fun main(args: Array<String>) {
 
     print("Blessed are those who mourn, for they shall be comforted.")
 }
+
+expect fun dohStart()
 
 fun Application.module() {
     configureRouting()

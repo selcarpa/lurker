@@ -1,13 +1,11 @@
 package model.config
 
-import io.ktor.http.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.peanuuutz.tomlkt.Toml
 import okio.Path.Companion.toPath
 import utils.readFile
-import kotlin.system.exitProcess
 
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -29,19 +27,13 @@ object Config {
         return if (ConfigurationUrl.orEmpty().isEmpty()) {
             TODO("Kotlin native not support read resource file, please use -c=xxx to specify configuration file")
         } else {
-            try {
-                val content = readFile(ConfigurationUrl!!.toPath())
-                if (ConfigurationUrl!!.endsWith("json") || ConfigurationUrl!!.endsWith("json5")) {
-                    json.decodeFromString<ConfigurationSettings>(content)
-                } else if (ConfigurationUrl!!.endsWith("toml")) {
-                    toml.decodeFromString(ConfigurationSettings.serializer(), content)
-                } else {
-                    throw IllegalArgumentException("not supported file type")
-                }
-            } catch (ex: Exception) {
-                print("load configuration failed: ${ex.message}")
-                ex.printStackTrace()
-                exitProcess(1)
+            val content = readFile(ConfigurationUrl!!.toPath())
+            if (ConfigurationUrl!!.endsWith("json") || ConfigurationUrl!!.endsWith("json5")) {
+                json.decodeFromString<ConfigurationSettings>(content)
+            } else if (ConfigurationUrl!!.endsWith("toml")) {
+                toml.decodeFromString(ConfigurationSettings.serializer(), content)
+            } else {
+                throw IllegalArgumentException("not supported file type")
             }
         }
     }
