@@ -30,7 +30,7 @@ object Config {
 
     private fun initConfiguration(): ConfigurationSettings {
         return if (ConfigurationUrl.orEmpty().isEmpty()) {
-            TODO("Kotlin native not support read resource file, please use -c=xxx to specify configuration file")
+           loadFromResource(json, toml, yaml)
         } else {
             val content = readFile(ConfigurationUrl!!.toPath())
             when {
@@ -52,7 +52,10 @@ object Config {
             }
         }
     }
+
 }
+
+expect fun loadFromResource(json: Json, toml: Toml, yaml: Yaml): ConfigurationSettings
 
 @Serializable
 data class ConfigurationSettings(

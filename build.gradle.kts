@@ -24,7 +24,7 @@ repositories {
 sqldelight {
     databases {
         create("Database") {
-            packageName.set("one.tain.lurker")
+            packageName.set("database")
         }
     }
 }

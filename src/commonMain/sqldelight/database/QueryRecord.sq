@@ -1,9 +1,17 @@
-CREATE TABLE query_record
+CREATE TABLE QueryRecord
 (
-    query_id    TEXT NOT NULL
+    queryId    TEXT NOT NULL
         CONSTRAINT query_record_pk
             PRIMARY KEY,
-    query_name  text,
-    create_time integer
+    queryName  TEXT,
+    queryType INTEGER,
+    plainRequest TEXT,
+    createTime INTEGER
+    )
+;
+
+insert:
+INSERT INTO QueryRecord (queryId,queryName,queryType,plainRequest,createTime)VALUES (
+UUID(),?,?,?,?
 );
 
