@@ -1,0 +1,9 @@
+CREATE TABLE query_record
+(
+    query_id    TEXT NOT NULL
+        CONSTRAINT query_record_pk
+            PRIMARY KEY,
+    query_name  text,
+    create_time integer
+);
+

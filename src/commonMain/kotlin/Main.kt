@@ -2,14 +2,15 @@ import io.ktor.network.selector.*
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.runBlocking
 import lurker.Dns
 import lurker.configureRouting
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
 
-fun main(args: Array<String>) {
+fun main(args: Array<String>) = runBlocking{
     args.forEach {
-        if (it.startsWith("-c=")) {
+        if (it.startsWith("-c=")) {//load the configuration file
             ConfigurationUrl = it.replace("-c=", "")
         }
     }

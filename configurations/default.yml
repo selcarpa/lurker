@@ -1,0 +1,12 @@
+timeout: 5000
+doh:
+  enable: false
+dns:
+  udp:
+    enable: true
+    port: 8888
+  tcp:
+    enable: true
+    port: 8888
+recursive:
+  enable: true
