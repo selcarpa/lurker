@@ -47,7 +47,18 @@ kotlin {
 //    linuxArm64 {
 //        config()
 //    }
-    jvm {}
+    jvm {
+        withJava()
+        val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            doFirst {
+                manifest {
+                    attributes["Main-Class"] = "MainKt"
+                }
+                from(configurations.getByName("runtimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
+            }
+        }
+    }
     sourceSets {
         commonMain {
             dependencies {
