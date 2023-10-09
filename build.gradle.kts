@@ -24,9 +24,10 @@ repositories {
 sqldelight {
     databases {
         create("Database") {
-            packageName.set("database")
+            packageName.set("one.tain.lurker")
         }
     }
+    linkSqlite.set(true)
 }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
