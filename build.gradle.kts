@@ -4,13 +4,16 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 val ktor_version: String by project
 val kotlin_version: String by project
+val sqllin_version: String by project
 val okio_version:String by project
+val kotlin_logging_version: String by project
+val taskGroupName = "lurker"
 
 plugins {
     kotlin("multiplatform") version "1.9.10"
-    id("io.ktor.plugin") version "2.3.3"
+    id("io.ktor.plugin") version "2.3.5"
     kotlin("plugin.serialization") version "1.9.0"
-    id("app.cash.sqldelight") version "2.0.0"
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
 }
 
 group = "one.tain"
@@ -21,13 +24,6 @@ repositories {
     google()
 }
 
-sqldelight {
-    databases {
-        create("Database") {
-            packageName.set("database")
-        }
-    }
-}
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -66,22 +62,35 @@ kotlin {
                 implementation("io.ktor:ktor-network-tls:$ktor_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
                 implementation("com.squareup.okio:okio:$okio_version")
-                implementation("net.peanuuutz:tomlkt:0.2.0")
                 implementation("net.mamoe.yamlkt:yamlkt:0.13.0")
+                implementation("net.peanuuutz.tomlkt:tomlkt:0.3.7")
+                implementation("com.ctrip.kotlin:sqllin-dsl:$sqllin_version")
+                implementation("com.ctrip.kotlin:sqllin-driver:$sqllin_version")
+                implementation("io.github.oshai:kotlin-logging:$kotlin_logging_version")
             }
         }
         val linuxX64Main by getting{
             dependencies{
                 implementation("io.ktor:ktor-server-cio:$ktor_version")
-                implementation("app.cash.sqldelight:native-driver:2.0.0")
             }
         }
         val jvmMain by getting{
             dependencies{
                 implementation("io.ktor:ktor-server-netty:$ktor_version")
-                implementation("app.cash.sqldelight:sqlite-driver:2.0.0")
+                implementation("ch.qos.logback:logback-classic:1.4.7")
             }
         }
 
     }
+}
+// KSP dependencies
+dependencies {
+    // sqllin-processor
+    add("kspCommonMainMetadata", "com.ctrip.kotlin:sqllin-processor:$sqllin_version")
+}
+
+tasks.register("github") {
+    group = taskGroupName
+    dependsOn(tasks.getByName("linuxX64Binaries"))
+    dependsOn(tasks.getByName("jvmJar"))
 }

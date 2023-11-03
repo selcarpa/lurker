@@ -1,5 +1,6 @@
 package model.config
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -8,6 +9,8 @@ import net.peanuuutz.tomlkt.Toml
 import okio.Path.Companion.toPath
 import utils.readFile
 
+
+private val logger = KotlinLogging.logger {}
 
 @OptIn(ExperimentalSerializationApi::class)
 private val json = Json {
@@ -18,8 +21,8 @@ private val json = Json {
 
 private val toml = Toml {
     ignoreUnknownKeys = true
+    explicitNulls = false
 }
-
 private val yaml = Yaml {
 
 }
