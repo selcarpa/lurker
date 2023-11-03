@@ -10,7 +10,7 @@ val kotlin_logging_version: String by project
 val taskGroupName = "lurker"
 
 plugins {
-    kotlin("multiplatform") version "1.9.10"
+    kotlin("multiplatform") version "1.9.20"
     id("io.ktor.plugin") version "2.3.5"
     kotlin("plugin.serialization") version "1.9.0"
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
@@ -67,6 +67,8 @@ kotlin {
                 implementation("com.ctrip.kotlin:sqllin-dsl:$sqllin_version")
                 implementation("com.ctrip.kotlin:sqllin-driver:$sqllin_version")
                 implementation("io.github.oshai:kotlin-logging:$kotlin_logging_version")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+                implementation("com.benasher44:uuid:0.8.1")
             }
         }
         val linuxX64Main by getting{
