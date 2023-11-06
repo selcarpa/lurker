@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.mpp.Executable
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
@@ -25,9 +24,8 @@ repositories {
 }
 
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    targetHierarchy.default()
+    applyDefaultHierarchyTemplate()
     fun KotlinNativeTarget.config(custom: Executable.() -> Unit = {}) {
         binaries {
             executable {
@@ -57,6 +55,7 @@ kotlin {
     }
     sourceSets {
         commonMain {
+            kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
             dependencies {
                 implementation("io.ktor:ktor-server-core:$ktor_version")
                 implementation("io.ktor:ktor-network-tls:$ktor_version")

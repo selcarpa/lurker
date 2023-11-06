@@ -21,10 +21,11 @@ object Dns {
         val serverSocket = aSocket(selectorManager).udp().bind(InetSocketAddress("0.0.0.0", port))
         println("Dns Server listening at ${serverSocket.localAddress}")
         while (true) {
-            val datagram = serverSocket.receive()
             launch {
+                val datagram = serverSocket.receive()
                 val readBytes = datagram.packet.readBytes()
                 val dnsPackage = readBytes.toDnsPackage()
+                //TODO: to read cache but not forward the request
                 if (true) {
                     val timer = Timer(Configuration.timeout.seconds, Dispatchers.IO) {
                         println("timeout")

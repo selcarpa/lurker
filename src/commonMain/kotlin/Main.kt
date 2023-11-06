@@ -8,7 +8,7 @@ import lurker.configureRouting
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
 
-fun main(args: Array<String>) = runBlocking{
+fun main(args: Array<String>) = runBlocking {
     args.forEach {
         if (it.startsWith("-c=")) {//load the configuration file
             ConfigurationUrl = it.replace("-c=", "")
