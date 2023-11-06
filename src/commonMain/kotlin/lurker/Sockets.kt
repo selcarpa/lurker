@@ -1,7 +1,9 @@
 package lurker
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
+import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -13,11 +15,12 @@ import model.protocol.DnsPackage.Companion.toDnsPackage
 import utils.encodeHex
 import kotlin.time.Duration.Companion.seconds
 
-object Dns {
+private val logger = KotlinLogging.logger {}
 
+object Dns {
     fun startServer(selectorManager: SelectorManager, port: Int = 53) = runBlocking {
         val serverSocket = aSocket(selectorManager).udp().bind(InetSocketAddress("0.0.0.0", port))
-        println("Dns Server listening at ${serverSocket.localAddress}")
+        logger.info { ("Dns Server listening at ${serverSocket.localAddress}") }
         while (true) {
             launch {
                 val datagram = serverSocket.receive()
@@ -35,6 +38,28 @@ object Dns {
                                 ByteReadPacket(recursiveResult.toByteArray()), datagram.address
                             )
                         )
+                    }
+                }
+            }
+        }
+    }
+
+    fun startTcpServer(selectorManager: SelectorManager, port: Int = 53) = runBlocking {
+        val serverSocket = aSocket(selectorManager).tcp().bind(InetSocketAddress("0.0.0.0", port))
+        logger.info { ("TCP Dns Server listening at ${serverSocket.localAddress}") }
+        while (true) {
+            launch {
+                val socket = serverSocket.accept()
+                val readChannel = socket.openReadChannel()
+                val dnsPackage = readChannel.readRemaining().readBytes().toDnsPackage()
+                //TODO: to read cache but not forward the request
+                withTimeoutOrNull(Configuration.timeout.seconds) {
+                    recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
+                }.also { recursiveResult ->
+                    if (recursiveResult == null) {
+                        println("timeout")
+                    } else {
+                        socket.openWriteChannel(autoFlush = true).writeAvailable(recursiveResult.toByteArray())
                     }
                 }
             }
