@@ -3,15 +3,13 @@ package lurker
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
-import utils.Timer
 import utils.encodeHex
 import kotlin.time.Duration.Companion.seconds
 
@@ -26,13 +24,8 @@ object Dns {
                 val readBytes = datagram.packet.readBytes()
                 val dnsPackage = readBytes.toDnsPackage()
                 //TODO: to read cache but not forward the request
-                if (true) {
-                    val timer = Timer(Configuration.timeout.seconds, Dispatchers.IO) {
-                        println("timeout")
-                    }
-                    timer.join()
+                withTimeoutOrNull(Configuration.timeout.seconds) {
                     val recursive = recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
-                    timer.cancel()
                     serverSocket.send(
                         Datagram(
                             ByteReadPacket(recursive.toByteArray()), datagram.address

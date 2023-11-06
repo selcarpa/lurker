@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val ktor_version: String by project
 val kotlin_version: String by project
 val sqllin_version: String by project
-val okio_version:String by project
+val okio_version: String by project
 val kotlin_logging_version: String by project
 val taskGroupName = "lurker"
 
@@ -38,6 +38,9 @@ kotlin {
     linuxX64 {
         config()
     }
+//    mingwX64 {
+//        config()
+//    }
 //    linuxArm64 {
 //        config()
 //    }
@@ -70,18 +73,17 @@ kotlin {
                 implementation("com.benasher44:uuid:0.8.1")
             }
         }
-        val linuxX64Main by getting{
-            dependencies{
+        val nativeMain by getting {
+            dependencies {
                 implementation("io.ktor:ktor-server-cio:$ktor_version")
             }
         }
-        val jvmMain by getting{
-            dependencies{
+        val jvmMain by getting {
+            dependencies {
                 implementation("io.ktor:ktor-server-netty:$ktor_version")
                 implementation("ch.qos.logback:logback-classic:1.4.7")
             }
         }
-
     }
 }
 // KSP dependencies
