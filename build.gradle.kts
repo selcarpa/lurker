@@ -94,6 +94,7 @@ dependencies {
 
 tasks.register("github") {
     group = taskGroupName
+    dependsOn(tasks.getByName("compileCommonMainKotlinMetadata"))
     dependsOn(tasks.getByName("linuxX64Binaries"))
     dependsOn(tasks.getByName("jvmJar"))
 }

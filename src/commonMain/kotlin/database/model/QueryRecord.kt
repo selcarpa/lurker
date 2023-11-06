@@ -6,21 +6,21 @@ import database.database
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
-@DBRow
+@DBRow("query_record")
 @Serializable
-data class Record(
+data class QueryRecord(
     val content: String, val time: LocalDateTime
 ) {
     val id = uuid4().toString()
-}
 
-object QueryRecord {
-    fun insert(record: Record) {
-        database {
-            RecordTable { table ->
-                table INSERT record
+    companion object {
+        fun insert(queryRecord: QueryRecord) {
+            database {
+                QueryRecordTable { table ->
+                    table INSERT queryRecord
+                }
             }
         }
     }
-
 }
+
