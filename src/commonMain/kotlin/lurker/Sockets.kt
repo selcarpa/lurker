@@ -25,33 +25,37 @@ object Dns {
                 val dnsPackage = readBytes.toDnsPackage()
                 //TODO: to read cache but not forward the request
                 withTimeoutOrNull(Configuration.timeout.seconds) {
-                    val recursive = recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
-                    serverSocket.send(
-                        Datagram(
-                            ByteReadPacket(recursive.toByteArray()), datagram.address
+                    recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
+                }.also { recursiveResult ->
+                    if (recursiveResult == null) {
+                        println("timeout")
+                    } else {
+                        serverSocket.send(
+                            Datagram(
+                                ByteReadPacket(recursiveResult.toByteArray()), datagram.address
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
     }
-
-    private suspend fun recursive(
-        selectorManager: SelectorManager, dnsPackage: DnsPackage, destDns: InetSocketAddress
-    ): DnsPackage {
-        val socket = aSocket(selectorManager).udp().connect(destDns)
-        val byteArray = dnsPackage.toByteArray()
-        socket.send(
-            Datagram(
-                ByteReadPacket(byteArray), socket.remoteAddress
-            )
-        )
-        val datagram = socket.receive()
-        val readBytes = datagram.packet.readBytes()
-        println("Accepted ${readBytes.encodeHex()}")
-        println(readBytes.toDnsPackage())
-        socket.close()
-        return readBytes.toDnsPackage()
-    }
 }
 
+private suspend fun recursive(
+    selectorManager: SelectorManager, dnsPackage: DnsPackage, destDns: InetSocketAddress
+): DnsPackage {
+    val socket = aSocket(selectorManager).udp().connect(destDns)
+    val byteArray = dnsPackage.toByteArray()
+    socket.send(
+        Datagram(
+            ByteReadPacket(byteArray), socket.remoteAddress
+        )
+    )
+    val datagram = socket.receive()
+    val readBytes = datagram.packet.readBytes()
+    println("Accepted ${readBytes.encodeHex()}")
+    println(readBytes.toDnsPackage())
+    socket.close()
+    return readBytes.toDnsPackage()
+}
