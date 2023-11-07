@@ -7,8 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import lurker.Dns
-import lurker.configureRouting
+import core.Dns
+import core.configureRouting
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
 

@@ -75,7 +75,7 @@ data class DnsPackage(
                 index += 2
                 val qClass = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                question.add(Question(qName, TYPE.of(qType), qClass))
+                question.add(Question(qName, RecordType.of(qType), qClass))
             }
             val answer = mutableListOf<Resource>()
             for (i in 0 until anCount) {
@@ -129,7 +129,7 @@ data class DnsPackage(
             val rdLength = this[index1].toInt() * 256 + this[index1 + 1].toInt()
             index1 += 2
             val rData = this.copyOfRange(index1, index1 + rdLength).contentToString()
-            answer.add(Resource(name, TYPE.of(rType), dClass, ttl, rdLength, rData))
+            answer.add(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData))
             return index1
         }
 
@@ -179,16 +179,16 @@ data class DnsPackage(
     }
 }
 
-private fun BytePacketBuilder.writeRDATA(rdata: String, type: TYPE) {
+private fun BytePacketBuilder.writeRDATA(rdata: String, type: RecordType) {
     when (type) {
-        TYPE.A -> {
+        RecordType.A -> {
             val rdataSegments = rdata.split(".").map { it.toInt().toByte() }
             for (r in rdataSegments) {
                 this.writeByte(r)
             }
         }
 
-        TYPE.AAAA -> {
+        RecordType.AAAA -> {
             val rdataSegments = rdata.split(":").map { it.toInt().toByte() }
             for (r in rdataSegments) {
                 this.writeByte(r)
@@ -207,7 +207,7 @@ private fun BytePacketBuilder.writeRDATA(rdata: String, type: TYPE) {
  */
 data class Question(
     val qName: String,
-    val qType: TYPE,
+    val qType: RecordType,
     val qClass: Int
 )
 
@@ -216,51 +216,10 @@ data class Question(
  */
 data class Resource(
     val name: String,
-    val rType: TYPE,
+    val rType: RecordType,
     val rClass: Int,
     val ttl: Int,
     val rdLength: Int,
     val rData: String
 )
 
-@Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
-class TYPE(val value: Int, val name: String?) {
-    constructor(value: Int) : this(value, null)
-
-    companion object {
-        val A = TYPE(1, "A")
-        val NS = TYPE(2, "NS")
-        val CNAME = TYPE(5, "CNAME")
-        val SOA = TYPE(6, "SOA")
-        val PTR = TYPE(12, "PTR")
-        val MX = TYPE(15, "MX")
-        val TXT = TYPE(16, "TXT")
-        val AAAA = TYPE(28, "AAAA")
-        val SRV = TYPE(33, "SRV")
-        val OPT = TYPE(41, "OPT")
-        val ANY = TYPE(255, "ANY")
-
-        fun of(value: Int): TYPE {
-            return when (value) {
-                1 -> A
-                2 -> NS
-                5 -> CNAME
-                6 -> SOA
-                12 -> PTR
-                15 -> MX
-                16 -> TXT
-                28 -> AAAA
-                33 -> SRV
-                41 -> OPT
-                255 -> ANY
-                else -> TYPE(value)
-            }
-        }
-
-    }
-
-    override fun toString(): String {
-        return "TYPE(value=$value, name='${name ?: "UNKNOWN"}}')"
-    }
-
-}

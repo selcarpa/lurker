@@ -1,4 +1,4 @@
-package lurker
+package core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.network.selector.*
@@ -12,6 +12,7 @@ import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
+import service.CacheDomainService
 import utils.encodeHex
 import kotlin.time.Duration.Companion.seconds
 
@@ -26,7 +27,9 @@ object Dns {
                 val datagram = serverSocket.receive()
                 val readBytes = datagram.packet.readBytes()
                 val dnsPackage = readBytes.toDnsPackage()
+
                 //TODO: to read cache but not forward the request
+                CacheDomainService.get(dnsPackage.question)
                 withTimeoutOrNull(Configuration.timeout.seconds) {
                     recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
                 }.also { recursiveResult ->

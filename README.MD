@@ -5,8 +5,6 @@
 ## build
 
 ```shell
-# for jvm target
+./gradlew compileKotlinMetadata
 ./gradlew jvmJar
-# for liunx x64
-./gradlew linuxX64Binaries
 ```

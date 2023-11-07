@@ -1,4 +1,4 @@
-package lurker
+package core
 
 import io.ktor.server.application.*
 import io.ktor.server.response.*

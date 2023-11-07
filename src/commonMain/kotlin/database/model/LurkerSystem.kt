@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @DBRow("system_operation")
 @Serializable
 data class SystemOperation(
-    val type: Int, val time: LocalDateTime
+    val type: Int, val time: Long
 ) {
     val id = uuid4().toString()
 
@@ -26,7 +26,7 @@ data class SystemOperation(
         }
 
         fun insert(systemOperationType: SystemOperationType) {
-            insert(SystemOperation(systemOperationType.value,  Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())))
+            insert(SystemOperation(systemOperationType.value,  Clock.System.now().epochSeconds))
         }
     }
 }
