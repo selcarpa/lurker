@@ -22,9 +22,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install cURL Headers
-        run: sudo apt update && sudo apt install sqlite3 libsqlite3-dev
-
       - name: Metadata generation
         shell: bash
         run: |
