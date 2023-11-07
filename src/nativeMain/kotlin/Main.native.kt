@@ -1,16 +1,17 @@
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.staticCFunction
-import platform.posix.atexit
+
+private val logger = KotlinLogging.logger {}
 
 actual fun dohStart() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = false)
 }
 
-@OptIn(ExperimentalForeignApi::class)
+//@OptIn(ExperimentalForeignApi::class)
 actual fun registerShutdownHook(exec: () -> Unit) {
-    atexit(staticCFunction(exec))
+//    atexit(staticCFunction(exec))
+    logger.warn{"registerShutdownHook is not supported on native"}
 }
