@@ -31,7 +31,7 @@ data class DomainRecord(
     companion object {
         fun insertBatch(domainRecords: List<DomainRecord>) {
             database {
-                DomainTable { table ->
+                DomainRecordTable { table ->
                     table INSERT domainRecords
                 }
             }
@@ -39,23 +39,26 @@ data class DomainRecord(
 
         fun replaceBatch(domainRecords: List<DomainRecord>) {
             database {
-                openDatabase(configuration) { connection ->
-                    domainRecords.joinToString(";") {
-                        "replace into domain_record (id, name, recordType, content, ttl, priority, updateTime, cachedDomain) values ('${it.id}', '${it.name}', ${it.recordType}, '${it.content}', ${it.ttl}, ${it.priority}, ${
-                            it.updateTime
-                        }, ${it.cachedDomain})"
-                    }.also {
-                        connection.execSQL(it)
+                transaction {
+                    openDatabase(configuration) { connection ->
+                        domainRecords.joinToString(";") {
+                            """
+replace into domain_record (id, name, recordType, content, ttl, priority, updateTime, cachedDomain) 
+values 
+('${it.id}', '${it.name}', ${it.recordType}, '${it.content}', ${it.ttl}, ${it.priority}, ${it.updateTime}, ${it.cachedDomain})
+                        """
+                        }.also {
+                            connection.execSQL(it)
+                        }
                     }
-
                 }
             }
         }
 
         fun selectByNameType(name: String, recordType: RecordType): List<DomainRecord> {
             database {
-                DomainTable { table ->
-                    return@DomainTable table SELECT WHERE(
+                DomainRecordTable { table ->
+                    return@DomainRecordTable table SELECT WHERE(
                         (this.name EQ name) AND (this.recordType EQ recordType.value)
                     )
                 }
