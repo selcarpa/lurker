@@ -81,7 +81,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-server-netty:$ktor_version")
-                implementation("ch.qos.logback:logback-classic:1.4.7")
+                implementation("ch.qos.logback:logback-classic:1.4.11")
             }
         }
     }
