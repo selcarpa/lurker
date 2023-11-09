@@ -12,7 +12,6 @@ import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
-import service.CacheDomainService
 import utils.encodeHex
 import kotlin.time.Duration.Companion.seconds
 
@@ -29,12 +28,11 @@ object Dns {
                 val dnsPackage = readBytes.toDnsPackage()
 
                 //TODO: to read cache but not forward the request
-                CacheDomainService.get(dnsPackage.question)
                 withTimeoutOrNull(Configuration.timeout.seconds) {
-                    recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
+                    dnsRequest(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
                 }.also { recursiveResult ->
                     if (recursiveResult == null) {
-                        println("timeout")
+                        logger.error { "timeout" }
                     } else {
                         serverSocket.send(
                             Datagram(
@@ -57,10 +55,10 @@ object Dns {
                 val dnsPackage = readChannel.readRemaining().readBytes().toDnsPackage()
                 //TODO: to read cache but not forward the request
                 withTimeoutOrNull(Configuration.timeout.seconds) {
-                    recursive(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
+                    dnsRequest(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
                 }.also { recursiveResult ->
                     if (recursiveResult == null) {
-                        println("timeout")
+                        logger.warn { "timeout" }
                     } else {
                         socket.openWriteChannel(autoFlush = true).writeAvailable(recursiveResult.toByteArray())
                     }
@@ -70,7 +68,7 @@ object Dns {
     }
 }
 
-private suspend fun recursive(
+private suspend fun dnsRequest(
     selectorManager: SelectorManager, dnsPackage: DnsPackage, destDns: InetSocketAddress
 ): DnsPackage {
     val socket = aSocket(selectorManager).udp().connect(destDns)
@@ -82,8 +80,8 @@ private suspend fun recursive(
     )
     val datagram = socket.receive()
     val readBytes = datagram.packet.readBytes()
-    println("Accepted ${readBytes.encodeHex()}")
-    println(readBytes.toDnsPackage())
+    logger.info { "Accepted ${readBytes.encodeHex()}" }
+    logger.info { readBytes.toDnsPackage() }
     socket.close()
     return readBytes.toDnsPackage()
 }

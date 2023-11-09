@@ -1,9 +1,12 @@
 package service
 
 import database.model.DomainRecord
+import io.github.oshai.kotlinlogging.KotlinLogging
 import model.protocol.DnsPackage
 import model.protocol.Question
 import model.protocol.RecordType
+
+private val logger = KotlinLogging.logger {}
 
 object CacheDomainService {
     fun save(dnsPackages: List<DnsPackage>) {
@@ -13,13 +16,7 @@ object CacheDomainService {
         DomainRecord.insertBatch(domainRecordList)
     }
 
-    fun get(questions: List<Question>) {
-        val domainRecordList = questions.map {
-            DomainRecord.selectByNameType(it.qName, RecordType(it.qType.value))
-        }.toList()
-        println(domainRecordList)
-    }
-
+    fun get(question: Question) = DomainRecord.selectByNameType(question.qName, RecordType(question.qType.value))
 
 }
 

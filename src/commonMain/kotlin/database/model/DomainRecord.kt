@@ -43,8 +43,8 @@ data class DomainRecord(
                     openDatabase(configuration) { connection ->
                         domainRecords.joinToString(";") {
                             """
-replace into domain_record (id, name, recordType, content, ttl, priority, updateTime, cachedDomain) 
-values 
+REPLACE INTO domain_record (id, name, recordType, content, ttl, priority, updateTime, cachedDomain) 
+VALUES 
 ('${it.id}', '${it.name}', ${it.recordType}, '${it.content}', ${it.ttl}, ${it.priority}, ${it.updateTime}, ${it.cachedDomain})
                         """
                         }.also {
@@ -55,7 +55,7 @@ values
             }
         }
 
-        fun selectByNameType(name: String, recordType: RecordType): List<DomainRecord> {
+       fun selectByNameType(name: String, recordType: RecordType): List<DomainRecord> {
             database {
                 DomainRecordTable { table ->
                     return@DomainRecordTable table SELECT WHERE(
