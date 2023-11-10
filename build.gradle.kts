@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.Executable
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.HostManager
 
 val ktor_version: String by project
 val kotlin_version: String by project
@@ -26,24 +27,19 @@ repositories {
 
 kotlin {
     applyDefaultHierarchyTemplate()
-    fun KotlinNativeTarget.config(custom: Executable.() -> Unit = {}) {
-        binaries {
-            executable {
-                entryPoint = "main"
-                custom()
-            }
-        }
-    }
+
 
     linuxX64 {
         config()
+        setupNativeConfig()
     }
 //    mingwX64 {
 //        config()
 //    }
-    linuxArm64 {
-        config()
-    }
+//    linuxArm64 {
+//        config()
+//        setupNativeConfig()
+//    }
     jvm {
         withJava()
         val jvmJar by tasks.getting(org.gradle.jvm.tasks.Jar::class) {
@@ -90,6 +86,38 @@ kotlin {
 dependencies {
     // sqllin-processor
     add("kspCommonMainMetadata", "com.ctrip.kotlin:sqllin-processor:$sqllin_version")
+}
+
+fun KotlinNativeTarget.config(custom: Executable.() -> Unit = {}) {
+    binaries {
+        executable {
+            entryPoint = "main"
+            custom()
+        }
+    }
+}
+
+fun KotlinNativeTarget.setupNativeConfig() {
+    binaries {
+        all {
+            linkerOpts += when {
+                HostManager.hostIsLinux  -> listOf(
+                    "-lsqlite3",
+                    "-L$rootDir/libs/linux",
+                    "-L/usr/lib/x86_64-linux-gnu",
+                    "-L/usr/lib",
+                    "-L/usr/lib64",
+                    "--allow-shlib-undefined"
+                )
+
+                HostManager.hostIsMingw -> listOf(
+                    "-Lc:\\msys64\\mingw64\\lib", "-L$rootDir\\libs\\windows", "-lsqlite3"
+                )
+
+                else -> listOf("-lsqlite3")
+            }
+        }
+    }
 }
 
 tasks.register("github") {
