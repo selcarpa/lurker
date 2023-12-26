@@ -10,10 +10,10 @@ val kotlin_logging_version: String by project
 val taskGroupName = "lurker"
 
 plugins {
-    kotlin("multiplatform") version "1.9.20"
-    id("io.ktor.plugin") version "2.3.6"
-    kotlin("plugin.serialization") version "1.9.20"
-    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    kotlin("multiplatform") version "1.9.21"
+    id("io.ktor.plugin") version "2.3.7"
+    kotlin("plugin.serialization") version "1.9.21"
+    id("com.google.devtools.ksp") version "1.9.21-1.0.15"
 }
 
 group = "one.tain"
@@ -67,16 +67,15 @@ kotlin {
                 implementation("io.github.oshai:kotlin-logging:$kotlin_logging_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
                 implementation("com.benasher44:uuid:0.8.1")
+                implementation("io.ktor:ktor-server-cio:$ktor_version")
             }
         }
         val nativeMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-server-cio:$ktor_version")
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-server-netty:$ktor_version")
                 implementation("ch.qos.logback:logback-classic:1.4.11")
             }
         }

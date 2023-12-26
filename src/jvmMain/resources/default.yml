@@ -4,9 +4,14 @@ doh:
 dns:
   udp:
     enable: true
-    port: 8888
+    port: 5053
   tcp:
     enable: true
-    port: 8888
+    port: 5053
 recursive:
   enable: true
+debug: true
+database:
+  name: lurker.db
+  path: .
+

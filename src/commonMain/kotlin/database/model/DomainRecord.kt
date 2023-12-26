@@ -6,7 +6,7 @@ import com.ctrip.sqllin.dsl.annotation.DBRow
 import com.ctrip.sqllin.dsl.sql.clause.AND
 import com.ctrip.sqllin.dsl.sql.clause.EQ
 import com.ctrip.sqllin.dsl.sql.clause.WHERE
-import database.configuration
+import database.databaseConfiguration
 import database.database
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
@@ -40,7 +40,7 @@ data class DomainRecord(
         fun replaceBatch(domainRecords: List<DomainRecord>) {
             database {
                 transaction {
-                    openDatabase(configuration) { connection ->
+                    openDatabase(databaseConfiguration) { connection ->
                         domainRecords.joinToString(";") {
                             """
 REPLACE INTO domain_record (id, name, recordType, content, ttl, priority, updateTime, cachedDomain) 

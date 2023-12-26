@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import core.Dns
 import core.configureRouting
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
 
@@ -58,7 +60,10 @@ private fun startupEvent() {
     )
 }
 
-expect fun dohStart()
+ fun dohStart(){
+     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
+         .start(wait = false)
+ }
 
 expect fun registerShutdownHook(exec: () -> Unit)
 

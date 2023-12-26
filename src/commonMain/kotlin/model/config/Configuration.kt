@@ -33,7 +33,7 @@ object Config {
 
     private fun initConfiguration(): ConfigurationSettings {
         return if (ConfigurationUrl.orEmpty().isEmpty()) {
-           loadFromResource(json, toml, yaml)
+            loadFromResource(json, toml, yaml)
         } else {
             val content = readFile(ConfigurationUrl!!.toPath())
             when {
@@ -62,7 +62,17 @@ expect fun loadFromResource(json: Json, toml: Toml, yaml: Yaml): ConfigurationSe
 
 @Serializable
 data class ConfigurationSettings(
-    val timeout: Int, var doh: DohSettings = DohSettings(), var dns: DnsSettings = DnsSettings()
+    val timeout: Int,
+    var doh: DohSettings = DohSettings(),
+    var dns: DnsSettings = DnsSettings(),
+    var debug: Boolean = false,
+    var database: DatabaseSettings = DatabaseSettings(),
+)
+
+@Serializable
+data class DatabaseSettings(
+    var name: String = "lurker.db",
+    var path: String = "./db-test",
 )
 
 @Serializable
