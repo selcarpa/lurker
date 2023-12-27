@@ -66,7 +66,7 @@ kotlin {
                 implementation("com.ctrip.kotlin:sqllin-driver:$sqllin_version")
                 implementation("io.github.oshai:kotlin-logging:$kotlin_logging_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-                implementation("com.benasher44:uuid:0.8.1")
+                implementation("com.benasher44:uuid:0.8.2")
                 implementation("io.ktor:ktor-server-cio:$ktor_version")
             }
         }
