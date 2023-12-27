@@ -13,5 +13,4 @@ recursive:
 debug: true
 database:
   name: lurker.db
-  path: .
-
+  path: ./db-test

@@ -5,11 +5,10 @@ import com.ctrip.sqllin.driver.DatabasePath
 import com.ctrip.sqllin.dsl.Database
 import model.config.Config.Configuration
 
-//todo load from configuration
 expect fun getGlobalDatabasePath(path: String): DatabasePath
 val databaseConfiguration = DatabaseConfiguration(name = Configuration.database.name,
     path = getGlobalDatabasePath(Configuration.database.path),
-    version = 1,
+    version = 2,
     create = {
         it.execSQL(
             """
@@ -18,7 +17,7 @@ CREATE TABLE query_record (id varchar(36) PRIMARY KEY, content TEXT, time INT, q
         )
         it.execSQL(
             """
-CREATE TABLE system_operation (id varchar(36) PRIMARY KEY, type INT, time INT);
+CREATE TABLE system_operation (id varchar(36) PRIMARY KEY, type INT, time INT, content TEXT);
         """.trimIndent()
         )
         it.execSQL(
@@ -42,7 +41,13 @@ create unique index domain_record_name_recordType_content_uindex
         )
     },
     upgrade = { db, oldVersion, newVersion ->
-
+        if (oldVersion == 1 && newVersion == 2) {
+            db.execSQL(
+                """
+ALTER TABLE system_operation ADD COLUMN content TEXT;
+                    """.trimIndent()
+            )
+        }
     })
 
 val database = Database(databaseConfiguration, Configuration.debug)

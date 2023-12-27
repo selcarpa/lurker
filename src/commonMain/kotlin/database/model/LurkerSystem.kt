@@ -16,7 +16,7 @@ data class SystemOperation(
 ) {
     val id = uuid4().toString()
 
-    constructor(type: Int, time: Long) : this(type, time, null)
+    constructor(type: Int, time: Long) : this(type, time, "")
 
     companion object {
         fun insert(systemOperation: SystemOperation) {
