@@ -68,7 +68,7 @@ object Dns {
     }
 }
 
-private suspend fun dnsRequest(
+ suspend fun dnsRequest(
     selectorManager: SelectorManager, dnsPackage: DnsPackage, destDns: InetSocketAddress
 ): DnsPackage {
     val socket = aSocket(selectorManager).udp().connect(destDns)

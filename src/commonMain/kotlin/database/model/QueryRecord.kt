@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 @DBRow("query_record")
 @Serializable
 data class QueryRecord(
-    val content: String, val time: Long
+    val content: String,
+    val time: Long/*,
+    val fromIp: String*/
 ) {
     val id = uuid4().toString()
 

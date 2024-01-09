@@ -85,5 +85,5 @@ data class DnsTcpSettings(var enable: Boolean = false, var port: Int = 53)
 data class DnsUdpSettings(var enable: Boolean = false, var port: Int = 53)
 
 @Serializable
-data class DohSettings(var enable: Boolean = false)
+data class DohSettings(var enable: Boolean = false, var port: Int = 5303)
 

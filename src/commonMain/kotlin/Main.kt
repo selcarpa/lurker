@@ -60,10 +60,10 @@ private fun startupEvent() {
     )
 }
 
- fun dohStart(){
-     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
-         .start(wait = false)
- }
+fun dohStart() {
+    embeddedServer(CIO, port = Configuration.doh.port, host = "0.0.0.0", module = Application::module)
+        .start(wait = false)
+}
 
 expect fun registerShutdownHook(exec: () -> Unit)
 
