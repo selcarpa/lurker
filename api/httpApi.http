@@ -1,0 +1,4 @@
+# doh get
+GET {{host}}?dns=q80BAAABAAAAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQAB
+Content-Type: application/dns-message
+
