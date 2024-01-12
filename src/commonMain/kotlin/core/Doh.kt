@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.postDnsQuery() {
 private suspend fun PipelineContext<Unit, ApplicationCall>.getDnsQuery() {
     if (call.request.contentType().match("application/dns-message")) {
         call.request.queryParameters["dns"]?.let {
-            val dnsByteArray = it.toByteArray()
+            val dnsByteArray = it.decodeBase64Bytes()
             solveDnsQuery(dnsByteArray)
         }
     }
