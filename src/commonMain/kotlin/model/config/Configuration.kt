@@ -67,6 +67,7 @@ data class ConfigurationSettings(
     var dns: DnsSettings = DnsSettings(),
     var debug: Boolean = false,
     var database: DatabaseSettings = DatabaseSettings(),
+    var recursive: Recursive = Recursive()
 )
 
 @Serializable
@@ -87,3 +88,12 @@ data class DnsUdpSettings(var enable: Boolean = false, var port: Int = 53)
 @Serializable
 data class DohSettings(var enable: Boolean = false, var port: Int = 5303)
 
+@Serializable
+data class Recursive(
+    var enable: Boolean = false,
+    var useLocalDns: Boolean = false,
+    var upstream: List<Upstream> = listOf()
+)
+
+@Serializable
+data class Upstream(var type: String = "DNS", val host: String)

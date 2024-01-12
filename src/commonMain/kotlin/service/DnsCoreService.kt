@@ -9,11 +9,11 @@ fun resolve(questions: List<Question>) = runBlocking {
     //domain records from cache, it may contain multiple records of the same domain and type, in current version, we just choose the first one
     //TODO: choose the best one
     val resolved = mutableListOf<DomainRecord>()
-    val questTaskMap = questions.map {
+    val questTaskMap = questions.associate {
         "${it.qName}${it.qType.value}" to async {
             DomainRecord.selectByNameType(it.qName, it.qType).firstOrNull()
         }
-    }.toMap()
+    }
     //divide into resolved and unresolved domain records
     val unResolved = questTaskMap.filter {
         val domainRecord = it.value.await()
@@ -25,5 +25,5 @@ fun resolve(questions: List<Question>) = runBlocking {
 
     }
     unResolved
-
 }
+

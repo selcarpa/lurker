@@ -22,8 +22,8 @@ object Dns {
         val serverSocket = aSocket(selectorManager).udp().bind(InetSocketAddress("0.0.0.0", port))
         logger.info { ("Dns Server listening at ${serverSocket.localAddress}") }
         while (true) {
+            val datagram = serverSocket.receive()
             launch {
-                val datagram = serverSocket.receive()
                 val readBytes = datagram.packet.readBytes()
                 val dnsPackage = readBytes.toDnsPackage()
 
@@ -55,7 +55,9 @@ object Dns {
                 val dnsPackage = readChannel.readRemaining().readBytes().toDnsPackage()
                 //TODO: to read cache but not forward the request
                 withTimeoutOrNull(Configuration.timeout.seconds) {
-                    dnsRequest(selectorManager, dnsPackage, InetSocketAddress("8.8.8.8", 53))
+                    dnsRequest(
+                        selectorManager, dnsPackage, InetSocketAddress(Configuration.recursive.upstream[0].host, 53)
+                    )
                 }.also { recursiveResult ->
                     if (recursiveResult == null) {
                         logger.warn { "timeout" }
@@ -68,7 +70,7 @@ object Dns {
     }
 }
 
- suspend fun dnsRequest(
+suspend fun dnsRequest(
     selectorManager: SelectorManager, dnsPackage: DnsPackage, destDns: InetSocketAddress
 ): DnsPackage {
     val socket = aSocket(selectorManager).udp().connect(destDns)
@@ -80,8 +82,9 @@ object Dns {
     )
     val datagram = socket.receive()
     val readBytes = datagram.packet.readBytes()
-    logger.info { "Accepted ${readBytes.encodeHex()}" }
-    logger.info { readBytes.toDnsPackage() }
+    logger.info { "dnsRequest accepted ${readBytes.encodeHex()}" }
+    logger.info { "dnsRequest accepted ${readBytes.toDnsPackage()}" }
+
     socket.close()
     return readBytes.toDnsPackage()
 }

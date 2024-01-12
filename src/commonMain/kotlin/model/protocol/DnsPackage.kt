@@ -1,33 +1,138 @@
 package model.protocol
 
+import io.ktor.util.*
 import io.ktor.utils.io.core.*
+import utils.decodeHex
+import utils.encodeHex
 
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.1">rfc1035#section-4.1.1</a>
  */
 data class DnsPackage(
-    val id: Int,
+    /**
+     *  A 16 bit identifier assigned by the program that
+     *  generates any kind of query.  This identifier is copied
+     *  the corresponding reply and can be used by the requester
+     *  to match up replies to outstanding queries.
+     */
+    val id: String,
+    /**
+     *  A one bit field that specifies whether this message is a
+     *  query (0), or a response (1).
+     */
     val qr: Boolean,
+    /**
+     * A four bit field that specifies kind of query in this
+     *  message.  This value is set by the originator of a query
+     *  and copied into the response.  The values are:
+     *
+     *  0               a standard query (QUERY)
+     *
+     *  1               an inverse query (IQUERY)
+     *
+     *  2               a server status request (STATUS)
+     *
+     *  3-15            reserved for future use
+     */
     val opcode: Int,
+    /**
+     * Authoritative Answer - this bit is valid in responses,
+     * and specifies that the responding name server is an
+     * authority for the domain name in question section.
+     * Note that the contents of the answer section may have
+     * multiple owner names because of aliases.  The AA bit
+     * corresponds to the name which matches the query name, or
+     * the first owner name in the answer section.
+     */
     val aa: Boolean,
+    /**
+     * TrunCation - specifies that this message was truncated
+     * due to length greater than that permitted on the
+     * transmission channel.
+     */
     val tc: Boolean,
+    /**
+     * Recursion Desired - this bit may be set in a query and
+     * is copied into the response.  If RD is set, it directs
+     * the name server to pursue the query recursively.
+     * Recursive query support is optional.
+     */
     val rd: Boolean,
+    /**
+     * Recursion Available - this be is set or cleared in a
+     * response, and denotes whether recursive query support is
+     * available in the name server.
+     */
     val ra: Boolean,
+    /**
+     * Reserved for future use.  Must be zero in all queries
+     * and responses.
+     */
     val z: Int,
+    /**
+     * Response code - this 4 bit field is set as part of
+     * responses. The values have the following
+     * interpretation:
+     *
+     * 0               No error condition
+     * 1               Format error - The name server was
+     *                 unable to interpret the query.
+     * 2               Server failure - The name server was
+     *                 unable to process this query due to a
+     *                 problem with the name server.
+     * 3               Name Error - Meaningful only for
+     *                 responses from an authoritative name
+     *                 server, this code signifies that the
+     *                 domain name referenced in the query does
+     *                 not exist.
+     * 4               Not Implemented - The name server does
+     *                 not support the requested kind of query.
+     * 5               Refused - The name server refuses to
+     *                 perform the specified operation for
+     *                 policy reasons.  For example, a name
+     *                 server may not wish to provide the
+     *                 information to the particular requester,
+     *                 or a name server may not wish to perform
+     *                 a particular operation (e.g., zone
+     *                 transfer) for particular data.
+     * 6-15            Reserved for future use.
+     */
     val rCode: Int,
+    /**
+     * an unsigned 16 bit integer specifying the number of
+     * entries in the question section.
+     */
     val qdCount: Int,
+    /**
+     * an unsigned 16 bit integer specifying the number of
+     * resource records in the answer section.
+     */
     val anCount: Int,
+    /**
+     * an unsigned 16 bit integer specifying the number of name
+     * server resource records in the authority records
+     * section.
+     */
     val nsCount: Int,
+    /**
+     * an unsigned 16 bit integer specifying the number of
+     * resource records in the additional records section.
+     */
     val arCount: Int,
+
     val question: List<Question>,
     val answer: List<Resource>,
     val authority: List<Resource>,
     val additional: List<Resource>
 ) {
     companion object {
+        /**
+         * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.2>Question section format</a>
+         */
         private fun parseDomainName(content: ByteArray, index: Int): Pair<String, Int> {
             var i = index
             val domainName = mutableListOf<String>()
+            //https://www.rfc-editor.org/rfc/rfc1035#section-4.1.4
             if (content[i] == 0b11000000.toByte()) {
                 i += 2
                 val offset = content[index + 1].toInt()
@@ -46,13 +151,15 @@ data class DnsPackage(
             val domainSegments = domain.split(".")
             for (d in domainSegments) {
                 this.writeByte(d.length.toByte())
-                this.writeByte(d.toByte())
+                d.toByteArray().forEach {
+                    this.writeByte(it)
+                }
             }
             this.writeByte(0)
         }
 
         fun ByteArray.toDnsPackage(): DnsPackage {
-            val id = this[0].toInt() * 256 + this[1].toInt()
+            val id = this.copyOfRange(0, 2).encodeHex()
             val qr = this[2].toInt() and 0b10000000 != 0
             val opcode = this[2].toInt() and 0b01111000 shr 3
             val aa = this[2].toInt() and 0b00000100 != 0
@@ -112,8 +219,7 @@ data class DnsPackage(
         }
 
         private fun ByteArray.resolveResources(
-            index: Int,
-            answer: MutableList<Resource>
+            index: Int, answer: MutableList<Resource>
         ): Int {
             var index1 = index
             val rPair = parseDomainName(this, index1)
@@ -128,7 +234,7 @@ data class DnsPackage(
             index1 += 4
             val rdLength = this[index1].toInt() * 256 + this[index1 + 1].toInt()
             index1 += 2
-            val rData = this.copyOfRange(index1, index1 + rdLength).contentToString()
+            val rData = this.copyOfRange(index1, index1 + rdLength)
             answer.add(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData))
             return index1
         }
@@ -136,7 +242,7 @@ data class DnsPackage(
 
         fun DnsPackage.toByteArray(): ByteArray {
             val bytePacketBuilder = BytePacketBuilder()
-            bytePacketBuilder.writeShort(this.id.toShort())
+            bytePacketBuilder.writeBytes(this.id.decodeHex())
             var flags = 0
             if (this.qr) flags += 0b1000000000000000
             flags += this.opcode shl 11
@@ -174,30 +280,14 @@ data class DnsPackage(
             bytePacketBuilder.writeShort(this.rClass.toShort())
             bytePacketBuilder.writeInt(this.ttl)
             bytePacketBuilder.writeShort(this.rdLength.toShort())
-            bytePacketBuilder.writeRDATA(this.rData, this.rType)
+            bytePacketBuilder.writeBytes(this.rData)
         }
     }
 }
 
-private fun BytePacketBuilder.writeRDATA(rdata: String, type: RecordType) {
-    when (type) {
-        RecordType.A -> {
-            val rdataSegments = rdata.split(".").map { it.toInt().toByte() }
-            for (r in rdataSegments) {
-                this.writeByte(r)
-            }
-        }
-
-        RecordType.AAAA -> {
-            val rdataSegments = rdata.split(":").map { it.toInt().toByte() }
-            for (r in rdataSegments) {
-                this.writeByte(r)
-            }
-        }
-
-        else -> {
-            TODO("Not implemented")
-        }
+private fun BytePacketBuilder.writeBytes(bytes: ByteArray) {
+    bytes.forEach {
+        this.writeByte(it)
     }
 }
 
@@ -206,20 +296,17 @@ private fun BytePacketBuilder.writeRDATA(rdata: String, type: RecordType) {
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.2">rfc1035#section-4.1.2</a>
  */
 data class Question(
-    val qName: String,
-    val qType: RecordType,
-    val qClass: Int
+    val qName: String, val qType: RecordType, val qClass: Int
 )
 
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.3">rfc1035#section-4.1.3</a>
  */
-data class Resource(
-    val name: String,
-    val rType: RecordType,
-    val rClass: Int,
-    val ttl: Int,
-    val rdLength: Int,
-    val rData: String
-)
+class Resource(
+    val name: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: ByteArray
+) {
+    override fun toString(): String {
+        return "Resource(name='$name', rType=$rType, rClass=$rClass, ttl=$ttl, rdLength=$rdLength, rData=${rData.encodeHex()})"
+    }
+}
 

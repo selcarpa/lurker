@@ -14,6 +14,7 @@ class RecordType(val value: Int, val name: String?) {
         val TXT = RecordType(16, "TXT")
         val AAAA = RecordType(28, "AAAA")
         val SRV = RecordType(33, "SRV")
+        //https://datatracker.ietf.org/doc/html/rfc6891
         val OPT = RecordType(41, "OPT")
         val ANY = RecordType(255, "ANY")
 
