@@ -1,6 +1,5 @@
 package model.protocol
 
-import io.ktor.util.*
 import io.ktor.utils.io.core.*
 import utils.decodeHex
 import utils.encodeHex
@@ -120,9 +119,9 @@ data class DnsPackage(
      */
     val arCount: Int,
 
-    val question: List<Question>,
-    val answer: List<Resource>,
-    val authority: List<Resource>,
+    val questions: List<Question>,
+    val answers: List<Resource>,
+    val authorities: List<Resource>,
     val additional: List<Resource>
 ) {
     companion object {
@@ -257,16 +256,16 @@ data class DnsPackage(
             bytePacketBuilder.writeShort(this.anCount.toShort())
             bytePacketBuilder.writeShort(this.nsCount.toShort())
             bytePacketBuilder.writeShort(this.arCount.toShort())
-            for (question in this.question) {
+            for (question in this.questions) {
                 bytePacketBuilder.writeDomain(question.qName)
                 bytePacketBuilder.writeByte(0)
                 bytePacketBuilder.writeShort(question.qType.value.toShort())
                 bytePacketBuilder.writeShort(question.qClass.toShort())
             }
-            for (resource in this.answer) {
+            for (resource in this.answers) {
                 resource.write(bytePacketBuilder)
             }
-            for (resource in this.authority) {
+            for (resource in this.authorities) {
                 resource.write(bytePacketBuilder)
             }
             for (resource in this.additional) {

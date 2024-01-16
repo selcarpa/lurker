@@ -1,19 +1,18 @@
 package core
 
+import database.model.QueryRecord
+import database.model.toQueryRecord
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
-import io.ktor.serialization.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
-import io.ktor.utils.io.core.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import model.config.Config
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
@@ -22,7 +21,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger {}
 
-fun Application.configureRouting() {
+fun Application.configureDohRouting() {
     routing {
         get("/dns-query") { getDnsQuery() }
         post("/dns-query") { postDnsQuery() }
@@ -32,9 +31,9 @@ fun Application.configureRouting() {
 private suspend fun PipelineContext<Unit, ApplicationCall>.postDnsQuery() {
     if (call.request.contentType().match("application/dns-message")) {
         val dnsByteArray = call.receive<ByteArray>()
-        solveDnsQuery(dnsByteArray)
-
-
+        solveDnsQuery(dnsByteArray, call.toRemoteAddr())
+    } else {
+        call.respondRedirect("/")
     }
 }
 
@@ -42,15 +41,31 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getDnsQuery() {
     if (call.request.contentType().match("application/dns-message")) {
         call.request.queryParameters["dns"]?.let {
             val dnsByteArray = it.decodeBase64Bytes()
-            solveDnsQuery(dnsByteArray)
+            solveDnsQuery(dnsByteArray, call.toRemoteAddr())
         }
+    } else {
+        call.respondRedirect("/")
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.solveDnsQuery(dnsByteArray: ByteArray) {
+private fun ApplicationCall.toRemoteAddr(): String = if (request.header("X-Forwarded-For") != null) {
+    this.request.header("X-Forwarded-For")!!
+} else {
+    request.origin.remoteHost
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.solveDnsQuery(dnsByteArray: ByteArray, queryFrom: String) {
     logger.info { "doh interface receive: ${dnsByteArray.encodeHex()}" }
     val dnsPackage = dnsByteArray.toDnsPackage()
     logger.info { "doh interface receive: $dnsPackage" }
+
+    coroutineScope {
+        launch {
+            QueryRecord.insertBatch(dnsPackage.questions.map {
+                it.toQueryRecord(queryFrom)
+            })
+        }
+    }
 
     //TODO: to read cache but not forward the request
     withTimeoutOrNull(Config.Configuration.timeout.seconds) {

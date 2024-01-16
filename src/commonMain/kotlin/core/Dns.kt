@@ -49,8 +49,8 @@ object Dns {
         val serverSocket = aSocket(selectorManager).tcp().bind(InetSocketAddress("0.0.0.0", port))
         logger.info { ("TCP Dns Server listening at ${serverSocket.localAddress}") }
         while (true) {
+            val socket = serverSocket.accept()
             launch {
-                val socket = serverSocket.accept()
                 val readChannel = socket.openReadChannel()
                 val dnsPackage = readChannel.readRemaining().readBytes().toDnsPackage()
                 //TODO: to read cache but not forward the request

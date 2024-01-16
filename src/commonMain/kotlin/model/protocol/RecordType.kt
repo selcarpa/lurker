@@ -38,7 +38,7 @@ class RecordType(val value: Int, val name: String?) {
     }
 
     override fun toString(): String {
-        return "TYPE(value=$value, name='${name ?: "UNKNOWN"}}')"
+        return "TYPE(value=$value, name=${name ?: "UNKNOWN"})"
     }
 
 }

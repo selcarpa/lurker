@@ -1,6 +1,7 @@
 timeout: 5000
 doh:
   enable: true
+  port: 5303
 dns:
   udp:
     enable: true
@@ -13,6 +14,9 @@ recursive:
   useLocalDns: false
   upstream:
     - host: 223.5.5.5
+web:
+  enable: true
+  port: 5303
 debug: true
 database:
   name: lurker.db

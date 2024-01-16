@@ -67,8 +67,12 @@ data class ConfigurationSettings(
     var dns: DnsSettings = DnsSettings(),
     var debug: Boolean = false,
     var database: DatabaseSettings = DatabaseSettings(),
-    var recursive: Recursive = Recursive()
+    var recursive: Recursive = Recursive(),
+    var web: WebSettings = WebSettings()
 )
+
+@Serializable
+data class WebSettings(var enable: Boolean = false, var port: Int = 5303)
 
 @Serializable
 data class DatabaseSettings(

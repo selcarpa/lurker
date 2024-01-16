@@ -8,11 +8,12 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import core.Dns
-import core.configureRouting
+import core.configureDohRouting
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import model.config.Config.Configuration
 import model.config.Config.ConfigurationUrl
+import web.routing.configureWebRouting
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,17 +36,42 @@ fun main(args: Array<String>) = runBlocking {
         shutdownEvent()
     }
 
+    //anyway to start the dns server
     if (Configuration.doh.enable) {
         dohStart()
     }
 
+    //and start the dns server
     if (Configuration.dns.udp.enable) {
         launch {
             Dns.startServer(selectorManager = SelectorManager(Dispatchers.IO), port = Configuration.dns.udp.port)
         }
     }
 
+    //and start the tcp dns server
+    if (Configuration.dns.tcp.enable) {
+        launch {
+            Dns.startTcpServer(selectorManager = SelectorManager(Dispatchers.IO), port = Configuration.dns.tcp.port)
+        }
+    }
+
+    //if website enable and not listen the same port as doh, then configure web routing, if website listen the same port as doh, then configure web routing in doh start process
+    if (Configuration.web.enable && Configuration.web.port != Configuration.doh.port) {
+        webStart()
+    }
+
     logger.info { "Blessed are those who mourn, for they shall be comforted." }
+}
+
+fun webStart() {
+    embeddedServer(
+        CIO,
+        port = Configuration.web.port,
+        host = "0.0.0.0",
+        module = {
+            configureWebRouting()
+        }
+    ).start(wait = false)
 }
 
 private fun shutdownEvent() {
@@ -61,12 +87,18 @@ private fun startupEvent() {
 }
 
 fun dohStart() {
-    embeddedServer(CIO, port = Configuration.doh.port, host = "0.0.0.0", module = Application::module)
-        .start(wait = false)
+    embeddedServer(
+        CIO,
+        port = Configuration.doh.port,
+        host = "0.0.0.0",
+        module = {
+            configureDohRouting()
+            //if website listen the same port as doh, then configure web routing
+            if (Configuration.web.enable && Configuration.web.port == Configuration.doh.port) {
+                configureWebRouting()
+            }
+        }
+    ).start(wait = false)
 }
 
 expect fun registerShutdownHook(exec: () -> Unit)
-
-fun Application.module() {
-    configureRouting()
-}
