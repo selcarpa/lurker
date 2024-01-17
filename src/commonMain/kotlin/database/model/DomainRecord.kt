@@ -8,9 +8,12 @@ import com.ctrip.sqllin.dsl.sql.clause.EQ
 import com.ctrip.sqllin.dsl.sql.clause.WHERE
 import database.databaseConfiguration
 import database.database
+import io.ktor.util.*
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import model.protocol.RecordType
+import model.protocol.Resource
+import utils.encodeHex
 
 @DBRow("domain_record")
 @Serializable
@@ -55,7 +58,7 @@ VALUES
             }
         }
 
-       fun selectByNameType(name: String, recordType: RecordType): List<DomainRecord> {
+        fun selectByNameType(name: String, recordType: RecordType): List<DomainRecord> {
             database {
                 DomainRecordTable { table ->
                     return@DomainRecordTable table SELECT WHERE(
@@ -67,3 +70,11 @@ VALUES
         }
     }
 }
+
+fun Resource.toDomainRecord() = DomainRecord(
+    name = this.rName,
+    recordType = this.rType.value,
+    content = this.rData.encodeHex(),
+    ttl = this.ttl,
+    cachedDomain = true
+)

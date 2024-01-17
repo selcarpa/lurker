@@ -171,9 +171,9 @@ data class DnsPackage(
             val anCount = this[6].toInt() * 256 + this[7].toInt()
             val nsCount = this[8].toInt() * 256 + this[9].toInt()
             val arCount = this[10].toInt() * 256 + this[11].toInt()
-            val question = mutableListOf<Question>()
+            mutableListOf<Question>()
             var index = 12
-            for (i in 0 until qdCount) {
+            val question = IntRange(0, qdCount - 1).toList().map {
                 val qnPair = parseDomainName(this, index)
                 val qName = qnPair.first
                 index = qnPair.second
@@ -181,21 +181,25 @@ data class DnsPackage(
                 index += 2
                 val qClass = this[index].toInt() * 256 + this[index + 1].toInt()
                 index += 2
-                question.add(Question(qName, RecordType.of(qType), qClass))
+                return@map Question(qName, RecordType.of(qType), qClass)
             }
-            val answer = mutableListOf<Resource>()
-            for (i in 0 until anCount) {
-                index = resolveResources(index, answer)
-            }
-            val authority = mutableListOf<Resource>()
-            for (i in 0 until nsCount) {
-                index = resolveResources(index, authority)
 
-            }
-            val additional = mutableListOf<Resource>()
-            for (i in 0 until arCount) {
-                resolveResources(index, additional)
-            }
+            val answer = IntRange(0, anCount - 1).toList().map {
+                val resourcePair = resolveResources(index)
+                index = resourcePair.first
+                resourcePair.second
+            }.toList()
+            val authority = IntRange(0, nsCount - 1).toList().map {
+                val resourcePair = resolveResources(index)
+                index = resourcePair.first
+                resourcePair.second
+            }.toList()
+
+            val additional = IntRange(0, arCount - 1).map {
+                val resourcePair = resolveResources(index)
+                index = resourcePair.first
+                resourcePair.second
+            }.toList()
             return DnsPackage(
                 id,
                 qr,
@@ -218,8 +222,8 @@ data class DnsPackage(
         }
 
         private fun ByteArray.resolveResources(
-            index: Int, answer: MutableList<Resource>
-        ): Int {
+            index: Int
+        ): Pair<Int, Resource> {
             var index1 = index
             val rPair = parseDomainName(this, index1)
             val name = rPair.first
@@ -234,8 +238,7 @@ data class DnsPackage(
             val rdLength = this[index1].toInt() * 256 + this[index1 + 1].toInt()
             index1 += 2
             val rData = this.copyOfRange(index1, index1 + rdLength)
-            answer.add(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData))
-            return index1
+            return Pair(index1, Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData))
         }
 
 
@@ -302,10 +305,10 @@ data class Question(
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.3">rfc1035#section-4.1.3</a>
  */
 class Resource(
-    val name: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: ByteArray
+    val rName: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: ByteArray
 ) {
     override fun toString(): String {
-        return "Resource(name='$name', rType=$rType, rClass=$rClass, ttl=$ttl, rdLength=$rdLength, rData=${rData.encodeHex()})"
+        return "Resource(name='$rName', rType=$rType, rClass=$rClass, ttl=$ttl, rdLength=$rdLength, rData=${rData.encodeHex()})"
     }
 }
 

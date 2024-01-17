@@ -96,7 +96,8 @@ data class DohSettings(var enable: Boolean = false, var port: Int = 5303)
 data class Recursive(
     var enable: Boolean = false,
     var useLocalDns: Boolean = false,
-    var upstream: List<Upstream> = listOf()
+    var upstream: List<Upstream> = listOf(),
+    var fullRecursive: Boolean = true
 )
 
 @Serializable

@@ -11,3 +11,12 @@ package utils
  fun ByteArray.encodeHex(): String = joinToString("") {
     it.toInt().and(0xff).toString(16).padStart(2, '0')
 }
+
+
+fun ByteArray.toInt(): Int {
+    var result = 0
+    for (srcByte in this) {
+        result = (result shl 8) + (srcByte.toInt() and 0xFF)
+    }
+    return result
+}

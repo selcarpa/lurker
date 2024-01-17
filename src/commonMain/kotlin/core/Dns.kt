@@ -5,6 +5,7 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -12,6 +13,7 @@ import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
+import service.addCache
 import utils.encodeHex
 import kotlin.time.Duration.Companion.seconds
 
@@ -83,8 +85,14 @@ suspend fun dnsRequest(
     val datagram = socket.receive()
     val readBytes = datagram.packet.readBytes()
     logger.info { "dnsRequest accepted ${readBytes.encodeHex()}" }
-    logger.info { "dnsRequest accepted ${readBytes.toDnsPackage()}" }
+    val dnsPackageReceived = readBytes.toDnsPackage()
+    logger.info { "dnsRequest accepted $dnsPackageReceived" }
 
     socket.close()
-    return readBytes.toDnsPackage()
+    coroutineScope {
+        launch {
+//            addCache(dnsPackageReceived)
+        }
+    }
+    return dnsPackageReceived
 }

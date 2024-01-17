@@ -51,7 +51,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getDnsQuery() {
 private fun ApplicationCall.toRemoteAddr(): String = if (request.header("X-Forwarded-For") != null) {
     this.request.header("X-Forwarded-For")!!
 } else {
-    request.origin.remoteHost
+    request.origin.remoteAddress
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.solveDnsQuery(dnsByteArray: ByteArray, queryFrom: String) {
