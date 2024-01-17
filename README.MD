@@ -5,6 +5,6 @@
 ## build
 
 ```shell
-./gradlew compileKotlinMetadata
+./gradlew kspCommonMainKotlinMetadata
 ./gradlew jvmJar
 ```
