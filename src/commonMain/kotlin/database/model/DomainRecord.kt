@@ -74,7 +74,7 @@ VALUES
 fun Resource.toDomainRecord() = DomainRecord(
     name = this.rName,
     recordType = this.rType.value,
-    content = this.rData.encodeHex(),
+    content = this.rData,
     ttl = this.ttl,
     cachedDomain = true
 )

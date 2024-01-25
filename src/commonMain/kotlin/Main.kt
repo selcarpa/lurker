@@ -17,6 +17,7 @@ import web.routing.configureWebRouting
 
 private val logger = KotlinLogging.logger {}
 
+
 fun main(args: Array<String>) = runBlocking {
 
     args.forEach {
@@ -24,9 +25,14 @@ fun main(args: Array<String>) = runBlocking {
             ConfigurationUrl = it.replace("-c=", "")
         }
     }
+    //set log appender
+    logAppenderSet()
 
-    //detect the configuration if it is loaded
-    Configuration
+    //detect the configuration if it is loaded and solve debug task
+    if (Configuration.debug) {
+        debugLogSet()
+    }
+    logger.debug { "debug enabled" }
 
     //insert startup operation
     startupEvent()
@@ -102,3 +108,6 @@ fun dohStart() {
 }
 
 expect fun registerShutdownHook(exec: () -> Unit)
+expect fun logAppenderSet()
+
+expect fun debugLogSet()

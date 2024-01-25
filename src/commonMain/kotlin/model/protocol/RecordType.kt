@@ -1,6 +1,9 @@
 package model.protocol
 
+import kotlinx.serialization.Serializable
+
 @Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
+@Serializable
 class RecordType(val value: Int, val name: String?) {
     constructor(value: Int) : this(value, null)
 

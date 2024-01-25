@@ -13,10 +13,12 @@ import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.encodeToString
 import model.config.Config
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
 import utils.encodeHex
+import utils.json
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger {}
@@ -55,9 +57,9 @@ private fun ApplicationCall.toRemoteAddr(): String = if (request.header("X-Forwa
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.solveDnsQuery(dnsByteArray: ByteArray, queryFrom: String) {
-    logger.info { "doh interface receive: ${dnsByteArray.encodeHex()}" }
+    logger.debug { "doh interface receive: ${dnsByteArray.encodeHex()}" }
     val dnsPackage = dnsByteArray.toDnsPackage()
-    logger.info { "doh interface receive: $dnsPackage" }
+    logger.debug { "doh interface receive: ${json.encodeToString(dnsPackage)}" }
 
     coroutineScope {
         launch {

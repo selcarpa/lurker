@@ -59,9 +59,11 @@ ALTER TABLE system_operation ADD COLUMN content TEXT;
 ALTER TABLE query_record ADD COLUMN unionId VARCHAR(36);
                 """.trimIndent()
             )
-            db.execSQL("""
+            db.execSQL(
+                """
 CREATE INDEX query_record_unionId_index ON query_record (unionId);
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
     })
 

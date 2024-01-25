@@ -68,7 +68,7 @@ data class ConfigurationSettings(
     var debug: Boolean = false,
     var database: DatabaseSettings = DatabaseSettings(),
     var recursive: Recursive = Recursive(),
-    var web: WebSettings = WebSettings()
+    var web: WebSettings = WebSettings(),
 )
 
 @Serializable

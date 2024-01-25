@@ -1,12 +1,17 @@
 package model.protocol
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.utils.io.core.*
+import kotlinx.serialization.Serializable
 import utils.decodeHex
 import utils.encodeHex
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.1">rfc1035#section-4.1.1</a>
  */
+@Serializable
 data class DnsPackage(
     /**
      *  A 16 bit identifier assigned by the program that
@@ -133,9 +138,8 @@ data class DnsPackage(
             val domainName = mutableListOf<String>()
             //https://www.rfc-editor.org/rfc/rfc1035#section-4.1.4
             if (content[i] == 0b11000000.toByte()) {
-                i += 2
                 val offset = content[index + 1].toInt()
-                return Pair(parseDomainName(content, offset).first, i)
+                return Pair(parseDomainName(content, offset).first, i + 2)
             }
             while (content[i].toInt() != 0) {
                 val length = content[i].toInt()
@@ -186,19 +190,18 @@ data class DnsPackage(
 
             val answer = IntRange(0, anCount - 1).toList().map {
                 val resourcePair = resolveResources(index)
-                index = resourcePair.first
-                resourcePair.second
+                index = resourcePair.second
+                resourcePair.first
             }.toList()
             val authority = IntRange(0, nsCount - 1).toList().map {
                 val resourcePair = resolveResources(index)
-                index = resourcePair.first
-                resourcePair.second
+                index = resourcePair.second
+                resourcePair.first
             }.toList()
-
             val additional = IntRange(0, arCount - 1).map {
                 val resourcePair = resolveResources(index)
-                index = resourcePair.first
-                resourcePair.second
+                index = resourcePair.second
+                resourcePair.first
             }.toList()
             return DnsPackage(
                 id,
@@ -221,24 +224,26 @@ data class DnsPackage(
             )
         }
 
+        //fixme: offset returned is wrong
         private fun ByteArray.resolveResources(
             index: Int
-        ): Pair<Int, Resource> {
-            var index1 = index
-            val rPair = parseDomainName(this, index1)
+        ): Pair<Resource, Int> {
+            logger.debug { "resolveResources: ${this.copyOfRange(index, this.size).encodeHex()}" }
+            var i = index
+            val rPair = parseDomainName(this, i)
             val name = rPair.first
-            index1 = rPair.second
-            val rType = this[index1].toInt() * 256 + this[index1 + 1].toInt()
-            index1 += 2
-            val dClass = this[index1].toInt() * 256 + this[index1 + 1].toInt()
-            index1 += 2
+            i = rPair.second
+            val rType = this[i].toInt() * 256 + this[i + 1].toInt()
+            i += 2
+            val dClass = this[i].toInt() * 256 + this[i + 1].toInt()
+            i += 2
             val ttl =
-                this[index1].toInt() * 256 * 256 * 256 + this[index1 + 1].toInt() * 256 * 256 + this[index1 + 2].toInt() * 256 + this[index1 + 3].toInt()
-            index1 += 4
-            val rdLength = this[index1].toInt() * 256 + this[index1 + 1].toInt()
-            index1 += 2
-            val rData = this.copyOfRange(index1, index1 + rdLength)
-            return Pair(index1, Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData))
+                this[i].toInt() * 256 * 256 * 256 + this[i + 1].toInt() * 256 * 256 + this[i + 2].toInt() * 256 + this[i + 3].toInt()
+            i += 4
+            val rdLength = this[i].toInt() * 256 + this[i + 1].toInt()
+            i += 2
+            val rData = this.copyOfRange(i, i + rdLength)
+            return Pair(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData.encodeHex()), i)
         }
 
 
@@ -282,7 +287,7 @@ data class DnsPackage(
             bytePacketBuilder.writeShort(this.rClass.toShort())
             bytePacketBuilder.writeInt(this.ttl)
             bytePacketBuilder.writeShort(this.rdLength.toShort())
-            bytePacketBuilder.writeBytes(this.rData)
+            bytePacketBuilder.writeBytes(this.rData.decodeHex())
         }
     }
 }
@@ -297,6 +302,7 @@ private fun BytePacketBuilder.writeBytes(bytes: ByteArray) {
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.2">rfc1035#section-4.1.2</a>
  */
+@Serializable
 data class Question(
     val qName: String, val qType: RecordType, val qClass: Int
 )
@@ -304,11 +310,8 @@ data class Question(
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.3">rfc1035#section-4.1.3</a>
  */
+@Serializable
 class Resource(
-    val rName: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: ByteArray
-) {
-    override fun toString(): String {
-        return "Resource(name='$rName', rType=$rType, rClass=$rClass, ttl=$ttl, rdLength=$rdLength, rData=${rData.encodeHex()})"
-    }
-}
+    val rName: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: String
+)
 

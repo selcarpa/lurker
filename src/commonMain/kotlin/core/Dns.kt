@@ -9,12 +9,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.encodeToString
 import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
 import service.addCache
 import utils.encodeHex
+import utils.json
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger {}
@@ -84,9 +86,9 @@ suspend fun dnsRequest(
     )
     val datagram = socket.receive()
     val readBytes = datagram.packet.readBytes()
-    logger.info { "dnsRequest accepted ${readBytes.encodeHex()}" }
+    logger.debug { "dnsRequest accepted ${readBytes.encodeHex()}" }
     val dnsPackageReceived = readBytes.toDnsPackage()
-    logger.info { "dnsRequest accepted $dnsPackageReceived" }
+    logger.debug { "dnsRequest accepted ${json.encodeToString(dnsPackageReceived)}" }
 
     socket.close()
     coroutineScope {
