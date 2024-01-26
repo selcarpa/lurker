@@ -228,7 +228,6 @@ data class DnsPackage(
         private fun ByteArray.resolveResources(
             index: Int
         ): Pair<Resource, Int> {
-            logger.debug { "resolveResources: ${this.copyOfRange(index, this.size).encodeHex()}" }
             var i = index
             val rPair = parseDomainName(this, i)
             val name = rPair.first
@@ -243,6 +242,7 @@ data class DnsPackage(
             val rdLength = this[i].toInt() * 256 + this[i + 1].toInt()
             i += 2
             val rData = this.copyOfRange(i, i + rdLength)
+            i += rdLength
             return Pair(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData.encodeHex()), i)
         }
 
@@ -314,4 +314,3 @@ data class Question(
 class Resource(
     val rName: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: String
 )
-

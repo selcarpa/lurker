@@ -79,6 +79,7 @@ suspend fun dnsRequest(
 ): DnsPackage {
     val socket = aSocket(selectorManager).udp().connect(destDns)
     val byteArray = dnsPackage.toByteArray()
+    logger.debug { "dnsRequest send ${byteArray.encodeHex()}" }
     socket.send(
         Datagram(
             ByteReadPacket(byteArray), socket.remoteAddress
@@ -93,7 +94,7 @@ suspend fun dnsRequest(
     socket.close()
     coroutineScope {
         launch {
-//            addCache(dnsPackageReceived)
+            addCache(dnsPackageReceived)
         }
     }
     return dnsPackageReceived

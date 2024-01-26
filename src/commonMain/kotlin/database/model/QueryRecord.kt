@@ -4,9 +4,10 @@ import com.benasher44.uuid.uuid4
 import com.ctrip.sqllin.dsl.annotation.DBRow
 import database.database
 import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import model.protocol.Question
+import utils.json
 
 @DBRow("query_record")
 @Serializable
@@ -38,6 +39,6 @@ data class QueryRecord(
 }
 
 fun Question.toQueryRecord(queryFrom: String): QueryRecord {
-    return QueryRecord(this.toString(), Clock.System.now().epochSeconds, queryFrom)
+    return QueryRecord(json.encodeToString(this), Clock.System.now().epochSeconds, queryFrom)
 }
 
