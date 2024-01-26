@@ -54,7 +54,7 @@ data class DomainRecord(
             database {
                 DomainRecordTable { table ->
                     return@DomainRecordTable table SELECT WHERE(
-                        (this.name EQ name) AND (this.recordType EQ recordType.value)
+                        (this.name EQ name) AND (this.recordType EQ recordType.value.toInt())
                     )
                 }
             }
@@ -65,8 +65,8 @@ data class DomainRecord(
 
 fun Resource.toDomainRecord() = DomainRecord(
     name = this.rName,
-    recordType = this.rType.value,
+    recordType = this.rType.value.toInt(),
     content = this.rData,
-    ttl = this.ttl,
+    ttl = this.ttl.toInt(),
     cachedDomain = true
 )

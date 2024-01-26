@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalUnsignedTypes::class)
+
 package model.protocol
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -106,23 +108,23 @@ data class DnsPackage(
      * an unsigned 16 bit integer specifying the number of
      * entries in the question section.
      */
-    val qdCount: Int,
+    val qdCount: UInt,
     /**
      * an unsigned 16 bit integer specifying the number of
      * resource records in the answer section.
      */
-    val anCount: Int,
+    val anCount: UInt,
     /**
      * an unsigned 16 bit integer specifying the number of name
      * server resource records in the authority records
      * section.
      */
-    val nsCount: Int,
+    val nsCount: UInt,
     /**
      * an unsigned 16 bit integer specifying the number of
      * resource records in the additional records section.
      */
-    val arCount: Int,
+    val arCount: UInt,
 
     val questions: List<Question>,
     val answers: List<Resource>,
@@ -171,34 +173,34 @@ data class DnsPackage(
             val ra = this[3].toInt() and 0b10000000 != 0
             val z = this[3].toInt() and 0b01110000 shr 4
             val rCode = this[3].toInt() and 0b00001111
-            val qdCount = this[4].toInt() * 256 + this[5].toInt()
-            val anCount = this[6].toInt() * 256 + this[7].toInt()
-            val nsCount = this[8].toInt() * 256 + this[9].toInt()
-            val arCount = this[10].toInt() * 256 + this[11].toInt()
+            val qdCount = this[4].toUInt() * 256u + this[5].toUInt()
+            val anCount = this[6].toUInt() * 256u + this[7].toUInt()
+            val nsCount = this[8].toUInt() * 256u + this[9].toUInt()
+            val arCount = this[10].toUInt() * 256u + this[11].toUInt()
             mutableListOf<Question>()
             var index = 12
-            val question = IntRange(0, qdCount - 1).toList().map {
+            val question = IntRange(0, (qdCount - 1u).toInt()).toList().map {
                 val qnPair = parseDomainName(this, index)
                 val qName = qnPair.first
                 index = qnPair.second
-                val qType = this[index].toInt() * 256 + this[index + 1].toInt()
+                val qType = this[index].toUInt() * 256u + this[index + 1].toUInt()
                 index += 2
-                val qClass = this[index].toInt() * 256 + this[index + 1].toInt()
+                val qClass = this[index].toUInt() * 256u + this[index + 1].toUInt()
                 index += 2
                 return@map Question(qName, RecordType.of(qType), qClass)
             }
 
-            val answer = IntRange(0, anCount - 1).toList().map {
+            val answer = IntRange(0, (anCount - 1u).toInt()).toList().map {
                 val resourcePair = resolveResources(index)
                 index = resourcePair.second
                 resourcePair.first
             }.toList()
-            val authority = IntRange(0, nsCount - 1).toList().map {
+            val authority = IntRange(0, (nsCount - 1u).toInt()).toList().map {
                 val resourcePair = resolveResources(index)
                 index = resourcePair.second
                 resourcePair.first
             }.toList()
-            val additional = IntRange(0, arCount - 1).map {
+            val additional = IntRange(0, (arCount - 1u).toInt()).map {
                 val resourcePair = resolveResources(index)
                 index = resourcePair.second
                 resourcePair.first
@@ -232,17 +234,17 @@ data class DnsPackage(
             val rPair = parseDomainName(this, i)
             val name = rPair.first
             i = rPair.second
-            val rType = this[i].toInt() * 256 + this[i + 1].toInt()
+            val rType = this[i].toUInt() * 256u + this[i + 1].toUInt()
             i += 2
-            val dClass = this[i].toInt() * 256 + this[i + 1].toInt()
+            val dClass = this[i].toUInt() * 256u + this[i + 1].toUInt()
             i += 2
             val ttl =
-                this[i].toInt() * 256 * 256 * 256 + this[i + 1].toInt() * 256 * 256 + this[i + 2].toInt() * 256 + this[i + 3].toInt()
+                this[i].toUInt() * 256u * 256u * 256u + this[i + 1].toUInt() * 256u * 256u + this[i + 2].toUInt() * 256u + this[i + 3].toUInt()
             i += 4
-            val rdLength = this[i].toInt() * 256 + this[i + 1].toInt()
+            val rdLength = this[i].toUInt() * 256u + this[i + 1].toUInt()
             i += 2
-            val rData = this.copyOfRange(i, i + rdLength)
-            i += rdLength
+            val rData = this.copyOfRange(i, i + rdLength.toInt())
+            i += rdLength.toInt()
             return Pair(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData.encodeHex()), i)
         }
 
@@ -252,13 +254,13 @@ data class DnsPackage(
             bytePacketBuilder.writeBytes(this.id.decodeHex())
             var flags = 0
             if (this.qr) flags += 0b1000000000000000
-            flags += this.opcode shl 11
+            flags += this.opcode.toInt() shl 11
             if (this.aa) flags += 0b0000010000000000
             if (this.tc) flags += 0b0000001000000000
             if (this.rd) flags += 0b0000000100000000
             if (this.ra) flags += 0b0000000010000000
-            flags += this.z shl 4
-            flags += this.rCode
+            flags += this.z.toInt() shl 4
+            flags += this.rCode.toInt()
             bytePacketBuilder.writeShort(flags.toShort())
             bytePacketBuilder.writeShort(this.qdCount.toShort())
             bytePacketBuilder.writeShort(this.anCount.toShort())
@@ -285,7 +287,7 @@ data class DnsPackage(
         private fun Resource.write(bytePacketBuilder: BytePacketBuilder) {
             bytePacketBuilder.writeShort(this.rType.value.toShort())
             bytePacketBuilder.writeShort(this.rClass.toShort())
-            bytePacketBuilder.writeInt(this.ttl)
+            bytePacketBuilder.writeUInt(this.ttl)
             bytePacketBuilder.writeShort(this.rdLength.toShort())
             bytePacketBuilder.writeBytes(this.rData.decodeHex())
         }
@@ -304,7 +306,7 @@ private fun BytePacketBuilder.writeBytes(bytes: ByteArray) {
  */
 @Serializable
 data class Question(
-    val qName: String, val qType: RecordType, val qClass: Int
+    val qName: String, val qType: RecordType, val qClass: UInt
 )
 
 /**
@@ -312,5 +314,5 @@ data class Question(
  */
 @Serializable
 class Resource(
-    val rName: String, val rType: RecordType, val rClass: Int, val ttl: Int, val rdLength: Int, val rData: String
+    val rName: String, val rType: RecordType, val rClass: UInt, val ttl: UInt, val rdLength: UInt, val rData: String
 )

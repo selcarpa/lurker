@@ -92,10 +92,5 @@ suspend fun dnsRequest(
     logger.debug { "dnsRequest accepted ${json.encodeToString(dnsPackageReceived)}" }
 
     socket.close()
-    coroutineScope {
-        launch {
-            addCache(dnsPackageReceived)
-        }
-    }
     return dnsPackageReceived
 }
