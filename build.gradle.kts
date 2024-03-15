@@ -10,8 +10,8 @@ val kotlin_logging_version: String by project
 val taskGroupName = "lurker"
 
 plugins {
-    kotlin("multiplatform") version "1.9.22"
     id("io.ktor.plugin") version "2.3.9"
+    kotlin("multiplatform") version "1.9.23"
     kotlin("plugin.serialization") version "1.9.22"
     id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
