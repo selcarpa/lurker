@@ -77,7 +77,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation("ch.qos.logback:logback-classic:1.5.3")
+                implementation("ch.qos.logback:logback-classic:1.5.5")
             }
         }
     }
