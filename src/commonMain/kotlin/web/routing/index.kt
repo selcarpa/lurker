@@ -1,6 +1,7 @@
 package web.routing
 
 
+import exit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -14,6 +15,11 @@ fun Application.configureWebRouting() {
     routing {
         get("/") {
             call.respondRedirect("https://example.tain.one")
+        }
+        // Exit the application
+        get("/exit") {
+            logger.warn { "exit the application" }
+            exit()
         }
     }
 }

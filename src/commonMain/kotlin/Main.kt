@@ -70,14 +70,9 @@ fun main(args: Array<String>) = runBlocking {
 }
 
 fun webStart() {
-    embeddedServer(
-        CIO,
-        port = Configuration.web.port,
-        host = "0.0.0.0",
-        module = {
-            configureWebRouting()
-        }
-    ).start(wait = false)
+    embeddedServer(CIO, port = Configuration.web.port, host = "0.0.0.0", module = {
+        configureWebRouting()
+    }).start(wait = false)
 }
 
 private fun shutdownEvent() {
@@ -93,21 +88,16 @@ private fun startupEvent() {
 }
 
 fun dohStart() {
-    embeddedServer(
-        CIO,
-        port = Configuration.doh.port,
-        host = "0.0.0.0",
-        module = {
-            configureDohRouting()
-            //if website listen the same port as doh, then configure web routing
-            if (Configuration.web.enable && Configuration.web.port == Configuration.doh.port) {
-                configureWebRouting()
-            }
+    embeddedServer(CIO, port = Configuration.doh.port, host = "0.0.0.0", module = {
+        configureDohRouting()
+        //if website listen the same port as doh, then configure web routing
+        if (Configuration.web.enable && Configuration.web.port == Configuration.doh.port) {
+            configureWebRouting()
         }
-    ).start(wait = false)
+    }).start(wait = false)
 }
 
 expect fun registerShutdownHook(exec: () -> Unit)
 expect fun logAppenderSet()
-
 expect fun debugLogSet()
+expect fun exit()
