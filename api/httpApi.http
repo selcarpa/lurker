@@ -1,4 +1,6 @@
-# doh get
-GET {{host}}?dns=q80BAAABAAAAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQAB
+### doh get A record for www.example.com
+GET {{host}}/dns-query?dns=q80BAAABAAAAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQAB
 Content-Type: application/dns-message
 
+### exit
+GET {{host}}/api/exit

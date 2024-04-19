@@ -13,7 +13,13 @@ import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.toLocalDateTime
 
+import kotlin.system.exitProcess
+
 private val logger = KotlinLogging.logger {}
+
+actual fun exit() {
+    exitProcess(0)
+}
 
 //@OptIn(ExperimentalForeignApi::class)
 actual fun registerShutdownHook(exec: () -> Unit) {

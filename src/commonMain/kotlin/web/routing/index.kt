@@ -17,7 +17,7 @@ fun Application.configureWebRouting() {
             call.respondRedirect("https://example.tain.one")
         }
         // Exit the application
-        get("/exit") {
+        get("/api/exit") {
             logger.warn { "exit the application" }
             exit()
         }

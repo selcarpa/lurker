@@ -6,10 +6,16 @@ import io.ktor.util.logging.Logger
 import ch.qos.logback.core.ConsoleAppender
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
+import kotlin.system.exitProcess
+
+actual fun exit() {
+    exitProcess(0)
+}
 
 actual fun registerShutdownHook(exec: () -> Unit) {
     Runtime.getRuntime().addShutdownHook(Thread({ exec() }, "bye"))
 }
+
 actual fun logAppenderSet() {
 }
 

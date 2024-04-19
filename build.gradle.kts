@@ -78,6 +78,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("ch.qos.logback:logback-classic:1.5.3")
+                implementation("org.xerial:sqlite-jdbc:3.45.3.0")
             }
         }
     }
@@ -101,7 +102,7 @@ fun KotlinNativeTarget.setupNativeConfig() {
     binaries {
         all {
             linkerOpts += when {
-                HostManager.hostIsLinux  -> listOf(
+                HostManager.hostIsLinux -> listOf(
                     "-lsqlite3",
                     "-L$rootDir/libs/linux",
                     "-L/usr/lib/x86_64-linux-gnu",
