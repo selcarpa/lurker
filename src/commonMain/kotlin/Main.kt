@@ -2,7 +2,6 @@ import database.model.SystemOperation
 import database.model.SystemOperationType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.network.selector.*
-import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch

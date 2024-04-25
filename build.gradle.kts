@@ -69,6 +69,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
                 implementation("com.benasher44:uuid:0.8.2")
                 implementation("io.ktor:ktor-server-cio:$ktor_version")
+                implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
             }
         }
         val nativeMain by getting {
@@ -77,6 +78,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-server-call-logging:$ktor_version")
                 implementation("ch.qos.logback:logback-classic:1.5.3")
                 implementation("org.xerial:sqlite-jdbc:3.45.3.0")
             }

@@ -66,7 +66,7 @@ data class DomainRecord(
 fun Resource.toDomainRecord() = DomainRecord(
     name = this.rName,
     recordType = this.rType.value.toInt(),
-    content = this.rData,
+    content = this.rData.encode().encodeHex(),
     ttl = this.ttl.toInt(),
     cachedDomain = true
 )

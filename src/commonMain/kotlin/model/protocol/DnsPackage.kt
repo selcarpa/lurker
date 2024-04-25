@@ -245,7 +245,8 @@ data class DnsPackage(
             i += 2
             val rData = this.copyOfRange(i, i + rdLength.toInt())
             i += rdLength.toInt()
-            return Pair(Resource(name, RecordType.of(rType), dClass, ttl, rdLength, rData.encodeHex()), i)
+            val type = RecordType.of(rType)
+            return Pair(Resource(name, type, dClass, ttl, rdLength, type.rdataSovle(rData)), i)
         }
 
 
@@ -254,13 +255,13 @@ data class DnsPackage(
             bytePacketBuilder.writeBytes(this.id.decodeHex())
             var flags = 0
             if (this.qr) flags += 0b1000000000000000
-            flags += this.opcode.toInt() shl 11
+            flags += this.opcode shl 11
             if (this.aa) flags += 0b0000010000000000
             if (this.tc) flags += 0b0000001000000000
             if (this.rd) flags += 0b0000000100000000
             if (this.ra) flags += 0b0000000010000000
-            flags += this.z.toInt() shl 4
-            flags += this.rCode.toInt()
+            flags += this.z shl 4
+            flags += this.rCode
             bytePacketBuilder.writeShort(flags.toShort())
             bytePacketBuilder.writeShort(this.qdCount.toShort())
             bytePacketBuilder.writeShort(this.anCount.toShort())
@@ -289,7 +290,7 @@ data class DnsPackage(
             bytePacketBuilder.writeShort(this.rClass.toShort())
             bytePacketBuilder.writeUInt(this.ttl)
             bytePacketBuilder.writeShort(this.rdLength.toShort())
-            bytePacketBuilder.writeBytes(this.rData.decodeHex())
+            bytePacketBuilder.writeBytes(this.rData.encode())
         }
     }
 }
@@ -314,5 +315,5 @@ data class Question(
  */
 @Serializable
 class Resource(
-    val rName: String, val rType: RecordType, val rClass: UInt, val ttl: UInt, val rdLength: UInt, val rData: String
+    val rName: String, val rType: RecordType, val rClass: UInt, val ttl: UInt, val rdLength: UInt, val rData: RData
 )

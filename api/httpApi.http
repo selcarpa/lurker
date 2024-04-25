@@ -1,6 +1,18 @@
 ### doh get A record for www.example.com
-GET {{host}}/dns-query?dns=q80BAAABAAAAAAAAA3d3dwdleGFtcGxlA2NvbQAAAQAB
+GET {{host}}/dns-query?dns=jH4BAAABAAAAAAAADGRvd24tdGVuY2VudAdodW9yb25nAmNuAAABAAE=
 Content-Type: application/dns-message
 
 ### exit
 GET {{host}}/api/exit
+
+### decode
+GET {{host}}/api/decode?data=jH4BAAABAAAAAAAADGRvd24tdGVuY2VudAdodW9yb25nAmNuAAABAAE=
+
+
+### decode
+POST {{host}}/api/decode
+Content-Type: application/json
+
+{
+  "data": "jH4BAAABAAAAAAAADGRvd24tdGVuY2VudAdodW9yb25nAmNuAAABAAE="
+}
