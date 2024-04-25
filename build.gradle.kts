@@ -79,7 +79,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-server-call-logging:$ktor_version")
-                implementation("ch.qos.logback:logback-classic:1.5.3")
+                implementation("ch.qos.logback:logback-classic:1.5.6")
                 implementation("org.xerial:sqlite-jdbc:3.45.3.0")
             }
         }
