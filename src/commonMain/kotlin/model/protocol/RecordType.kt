@@ -1,6 +1,5 @@
 package model.protocol
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import model.protocol.AAAARData.Companion.toAAAARData
@@ -10,7 +9,6 @@ import model.protocol.HexRData.Companion.toHexRData
 import model.protocol.MXRData.Companion.toMXRData
 import model.protocol.NSRData.Companion.toNSRData
 import model.protocol.PTRRData.Companion.toPTRRData
-import model.protocol.SOARData.Companion.toSOARData
 import model.protocol.TXTRData.Companion.toTXTRData
 
 @Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
