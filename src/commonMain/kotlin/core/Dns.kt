@@ -5,16 +5,12 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import model.config.Config.Configuration
 import model.protocol.DnsPackage
 import model.protocol.DnsPackage.Companion.toByteArray
 import model.protocol.DnsPackage.Companion.toDnsPackage
-import service.addCache
 import utils.encodeHex
 import utils.json
 import kotlin.time.Duration.Companion.seconds
@@ -29,7 +25,9 @@ object Dns {
             val datagram = serverSocket.receive()
             launch {
                 val readBytes = datagram.packet.readBytes()
+                logger.debug { "dns interface receive: ${readBytes.encodeHex()}" }
                 val dnsPackage = readBytes.toDnsPackage()
+                logger.debug { "dns interface receive: ${json.encodeToString(dnsPackage)}" }
 
                 //TODO: to read cache but not forward the request
                 withTimeoutOrNull(Configuration.timeout.seconds) {
@@ -60,7 +58,9 @@ object Dns {
                 //TODO: to read cache but not forward the request
                 withTimeoutOrNull(Configuration.timeout.seconds) {
                     dnsRequest(
-                        selectorManager, dnsPackage, InetSocketAddress(Configuration.recursive.upstream[0].host, 53)
+                        SelectorManager(Dispatchers.IO),
+                        dnsPackage,
+                        InetSocketAddress(Configuration.recursive.upstream[0].host, 53)
                     )
                 }.also { recursiveResult ->
                     if (recursiveResult == null) {

@@ -14,9 +14,9 @@ import model.protocol.TXTRData.Companion.toTXTRData
 @Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
 @Serializable
 class RecordType(
-    val value: UInt, val name: String?, @Transient var rdataSovle: (ByteArray) -> RData = { it.toHexRData() }
+    val value: UShort, val name: String?, @Transient var rdataSovle: (ByteArray) -> RData = { it.toHexRData() }
 ) {
-    constructor(value: UInt) : this(value, null)
+    constructor(value: UShort) : this(value, null)
 
     companion object {
         val A = RecordType(1u, "A") { it.toARData() }
@@ -46,7 +46,7 @@ class RecordType(
                 33u -> SRV
                 41u -> OPT
                 255u -> ANY
-                else -> RecordType(value)
+                else -> RecordType(value.toUShort())
             }
         }
 

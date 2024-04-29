@@ -12,6 +12,21 @@ private val logger = KotlinLogging.logger {}
 
 /**
  * @see <a href="https://www.rfc-editor.org/rfc/rfc1035#section-4.1.1">rfc1035#section-4.1.1</a>
+ *                                     1  1  1  1  1  1
+ *       0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                      ID                       |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                    QDCOUNT                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                    ANCOUNT                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                    NSCOUNT                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                    ARCOUNT                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  */
 @Serializable
 data class DnsPackage(
@@ -40,7 +55,7 @@ data class DnsPackage(
      *
      *  3-15            reserved for future use
      */
-    val opcode: Int,
+    val opcode: UShort,
     /**
      * Authoritative Answer - this bit is valid in responses,
      * and specifies that the responding name server is an
@@ -74,7 +89,7 @@ data class DnsPackage(
      * Reserved for future use.  Must be zero in all queries
      * and responses.
      */
-    val z: Int,
+    val z: UShort,
     /**
      * Response code - this 4 bit field is set as part of
      * responses. The values have the following
@@ -103,28 +118,28 @@ data class DnsPackage(
      *                 transfer) for particular data.
      * 6-15            Reserved for future use.
      */
-    val rCode: Int,
+    val rCode: UShort,
     /**
      * an unsigned 16 bit integer specifying the number of
      * entries in the question section.
      */
-    val qdCount: UInt,
+    val qdCount: UShort,
     /**
      * an unsigned 16 bit integer specifying the number of
      * resource records in the answer section.
      */
-    val anCount: UInt,
+    val anCount: UShort,
     /**
      * an unsigned 16 bit integer specifying the number of name
      * server resource records in the authority records
      * section.
      */
-    val nsCount: UInt,
+    val nsCount: UShort,
     /**
      * an unsigned 16 bit integer specifying the number of
      * resource records in the additional records section.
      */
-    val arCount: UInt,
+    val arCount: UShort,
 
     val questions: List<Question>,
     val answers: List<Resource>,
@@ -208,17 +223,17 @@ data class DnsPackage(
             return DnsPackage(
                 id,
                 qr,
-                opcode,
+                opcode.toUShort(),
                 aa,
                 tc,
                 rd,
                 ra,
-                z,
-                rCode,
-                qdCount,
-                anCount,
-                nsCount,
-                arCount,
+                z.toUShort(),
+                rCode.toUShort(),
+                qdCount.toUShort(),
+                anCount.toUShort(),
+                nsCount.toUShort(),
+                arCount.toUShort(),
                 question,
                 answer,
                 authority,
@@ -255,13 +270,13 @@ data class DnsPackage(
             bytePacketBuilder.writeBytes(this.id.decodeHex())
             var flags = 0
             if (this.qr) flags += 0b1000000000000000
-            flags += this.opcode shl 11
+            flags += this.opcode.toInt() shl 11
             if (this.aa) flags += 0b0000010000000000
             if (this.tc) flags += 0b0000001000000000
             if (this.rd) flags += 0b0000000100000000
             if (this.ra) flags += 0b0000000010000000
-            flags += this.z shl 4
-            flags += this.rCode
+            flags += this.z.toInt() shl 4
+            flags += this.rCode.toInt()
             bytePacketBuilder.writeShort(flags.toShort())
             bytePacketBuilder.writeShort(this.qdCount.toShort())
             bytePacketBuilder.writeShort(this.anCount.toShort())
@@ -270,7 +285,7 @@ data class DnsPackage(
             for (question in this.questions) {
                 bytePacketBuilder.writeDomain(question.qName)
                 bytePacketBuilder.writeByte(0)
-                bytePacketBuilder.writeShort(question.qType.value.toShort())
+                bytePacketBuilder.writeUShort(question.qType.value)
                 bytePacketBuilder.writeShort(question.qClass.toShort())
             }
             for (resource in this.answers) {
