@@ -7,7 +7,7 @@ import utils.decodeHex
 import utils.encodeHex
 
 @Serializable
-abstract sealed class RData {
+sealed class RData {
     abstract fun encode(): ByteArray
 }
 

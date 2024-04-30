@@ -13,49 +13,34 @@ import model.protocol.TXTRData.Companion.toTXTRData
 
 @Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
 @Serializable
-class RecordType(
+enum class RecordType(
     val value: UShort,
-    private val name: String?,
     @Transient var rdataResolve: (ByteArray) -> RData = { it.toHexRData() }
 ) {
-    constructor(value: UShort) : this(value, null)
+    UNUSED(0u),
+    A(1u, { it.toARData() }),
+    NS(2u, { it.toNSRData() }),
+    CNAME(5u, { it.toCNAMERData() }),
+    SOA(6u),
+    PTR(12u, { it.toPTRRData() }),
+    MX(15u, { it.toMXRData() }),
+    TXT(16u, { it.toTXTRData() }),
+    AAAA(28u, { it.toAAAARData() }),
+    SRV(33u),
+
+    //https://datatracker.ietf.org/doc/html/rfc6891
+    OPT(41u),
+    ANY(255u);
 
     companion object {
-        val A = RecordType(1u, "A") { it.toARData() }
-        val NS = RecordType(2u, "NS") { it.toNSRData() }
-        val CNAME = RecordType(5u, "CNAME") { it.toCNAMERData() }
-        val SOA = RecordType(6u, "SOA")
-        val PTR = RecordType(12u, "PTR") { it.toPTRRData() }
-        val MX = RecordType(15u, "MX") { it.toMXRData() }
-        val TXT = RecordType(16u, "TXT") { it.toTXTRData() }
-        val AAAA = RecordType(28u, "AAAA") { it.toAAAARData() }
-        val SRV = RecordType(33u, "SRV")
-
-        //https://datatracker.ietf.org/doc/html/rfc6891
-        val OPT = RecordType(41u, "OPT")
-        val ANY = RecordType(255u, "ANY")
-
-        fun of(value: UInt): RecordType {
-            return when (value) {
-                1u -> A
-                2u -> NS
-                5u -> CNAME
-                6u -> SOA
-                12u -> PTR
-                15u -> MX
-                16u -> TXT
-                28u -> AAAA
-                33u -> SRV
-                41u -> OPT
-                255u -> ANY
-                else -> RecordType(value.toUShort())
-            }
+        fun of(value: UShort): RecordType {
+            return entries.find { it.value == value } ?: UNUSED
         }
-
     }
 
+
     override fun toString(): String {
-        return "TYPE(value=$value, name=${name ?: "UNKNOWN"})"
+        return "TYPE(value=$value, name=${name})"
     }
 
 }

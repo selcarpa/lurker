@@ -202,7 +202,7 @@ data class DnsPackage(
                 index += 2
                 val qClass = this[index].toUInt() * 256u + this[index + 1].toUInt()
                 index += 2
-                return@map Question(qName, RecordType.of(qType), qClass)
+                return@map Question(qName, RecordType.of(qType.toUShort()), qClass)
             }
 
             val answer = IntRange(0, (anCount - 1u).toInt()).toList().map {
@@ -260,7 +260,7 @@ data class DnsPackage(
             i += 2
             val rData = this.copyOfRange(i, i + rdLength.toInt())
             i += rdLength.toInt()
-            val type = RecordType.of(rType)
+            val type = RecordType.of(rType.toUShort())
             return Pair(Resource(name, type, dClass, ttl, rdLength, type.rdataResolve(rData)), i)
         }
 
