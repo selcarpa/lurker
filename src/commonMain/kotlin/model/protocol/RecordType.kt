@@ -14,7 +14,9 @@ import model.protocol.TXTRData.Companion.toTXTRData
 @Suppress("MemberVisibilityCanBePrivate", "SpellCheckingInspection")
 @Serializable
 class RecordType(
-    val value: UShort, val name: String?, @Transient var rdataSovle: (ByteArray) -> RData = { it.toHexRData() }
+    val value: UShort,
+    private val name: String?,
+    @Transient var rdataResolve: (ByteArray) -> RData = { it.toHexRData() }
 ) {
     constructor(value: UShort) : this(value, null)
 

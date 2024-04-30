@@ -261,7 +261,7 @@ data class DnsPackage(
             val rData = this.copyOfRange(i, i + rdLength.toInt())
             i += rdLength.toInt()
             val type = RecordType.of(rType)
-            return Pair(Resource(name, type, dClass, ttl, rdLength, type.rdataSovle(rData)), i)
+            return Pair(Resource(name, type, dClass, ttl, rdLength, type.rdataResolve(rData)), i)
         }
 
 
@@ -285,7 +285,7 @@ data class DnsPackage(
             for (question in this.questions) {
                 bytePacketBuilder.writeDomain(question.qName)
                 bytePacketBuilder.writeByte(0)
-                bytePacketBuilder.writeUShort(question.qType.value)
+                bytePacketBuilder.writeShort(question.qType.value.toShort())
                 bytePacketBuilder.writeShort(question.qClass.toShort())
             }
             for (resource in this.answers) {
