@@ -45,7 +45,7 @@ create unique index domain_record_name_recordType_content_uindex
         """.trimIndent()
         )
     },
-    upgrade = { db, oldVersion, newVersion ->
+    upgrade = { db, oldVersion, _ ->
         if (oldVersion < 2) {
             db.execSQL(
                 """
