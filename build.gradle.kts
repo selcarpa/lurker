@@ -12,7 +12,7 @@ val taskGroupName = "lurker"
 plugins {
     id("io.ktor.plugin") version "2.3.10"
     kotlin("multiplatform") version "1.9.23"
-    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
+    id("com.google.devtools.ksp") version "1.9.24-1.0.20"
     kotlin("plugin.serialization") version "1.9.23"
 }
 
