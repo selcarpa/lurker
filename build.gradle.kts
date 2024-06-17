@@ -62,7 +62,7 @@ kotlin {
                 implementation("com.squareup.okio:okio:$okio_version")
                 implementation("io.ktor:ktor-server-html-builder:$ktor_version")
                 implementation("net.mamoe.yamlkt:yamlkt:0.13.0")
-                implementation("net.peanuuutz.tomlkt:tomlkt:0.3.7")
+                implementation("net.peanuuutz.tomlkt:tomlkt:0.4.0")
                 implementation("com.ctrip.kotlin:sqllin-dsl:$sqllin_version")
                 implementation("com.ctrip.kotlin:sqllin-driver:$sqllin_version")
                 implementation("io.github.oshai:kotlin-logging:$kotlin_logging_version")
