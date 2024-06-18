@@ -43,3 +43,4 @@ bin/
 /.idea/
 /configs/
 /db-test/
+/.kotlin/

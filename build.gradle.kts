@@ -24,6 +24,11 @@ repositories {
     google()
 }
 
+kotlin.targets.withType<KotlinNativeTarget> {
+    binaries.all {
+        freeCompilerArgs += "-Xdisable-phases=EscapeAnalysis"
+    }
+}
 
 kotlin {
     applyDefaultHierarchyTemplate()
