@@ -63,7 +63,7 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-server-core:$ktor_version")
                 implementation("io.ktor:ktor-network-tls:$ktor_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
                 implementation("com.squareup.okio:okio:$okio_version")
                 implementation("io.ktor:ktor-server-html-builder:$ktor_version")
                 implementation("net.mamoe.yamlkt:yamlkt:0.13.0")
